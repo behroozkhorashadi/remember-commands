@@ -1,0 +1,14 @@
+vim somefile.txt 
+rm somefile.txt 
+whereis script
+vim /usr/bin/script 
+grep -rn lintcheck *
+cd ../../android-ui/
+subl .
+cd ../android-rider/android-rider/
+git add .
+gs
+git diff HEAD^ lint/src/main/java/com/ubercab/rider/lint/RiderDialogFragmentOnlyDetector.java
+****** previous commands read *******
+vim somefile.txt 
+git commit -a -m "renamed directory."

@@ -107,6 +107,11 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertFalse(ignore_rule.isMatch('git comit -a -m'))
         self.assertFalse(ignore_rule.isMatch('git foos'))
 
+    def test_ignoreRule_whenFileDoestExist_shouldNotCrash(self):
+        file_name = "test_files/test_input.txt"
+        store = command_store_lib.CommandStore()
+        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", "test_files/fileNotthere.txt",  False)
+
 
 if __name__ == '__main__':
     unittest.main()

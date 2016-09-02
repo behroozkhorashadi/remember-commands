@@ -95,7 +95,9 @@ class IgnoreRules:
 		'c' : ignoreRules.addContains,
 		'm' : ignoreRules.addMatches,
 		}
-		for line in reversed(open(srcFile).readlines()):
+		if not os.path.isfile(srcFile):
+			return ignoreRules
+		for line in open(srcFile).readlines():
 			split = line.split(":", 1)
 			if len(split) == 2:
 				methods[split[0]](split[1].strip())

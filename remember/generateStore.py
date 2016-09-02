@@ -17,7 +17,10 @@ def main():
 	pick_file_path = com_lib.getPickleFilePath(args.dir)
 	commands_file_path = os.path.join(args.dir, FILE_STORE_NAME)
 	ignore_rule_file = os.path.join(args.dir, IGNORE_RULE_FILE_NAME)
-	print 'Using ignore rules from ' + ignore_rule_file
+	if not os.path.isfile(ignore_rule_file):
+		ignore_rule_file = None
+	else:
+		print 'Using ignore rules from ' + ignore_rule_file
 	store = com_lib.getCommandStore(pick_file_path)
 	com_lib.readHistoryFile(store, args.historyfile, commands_file_path, ignore_rule_file)
 	print 'Reading ' + args.historyfile

@@ -43,11 +43,22 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_readFile(self):
         file_name = "test_files/test_input.txt"
         store = command_store_lib.CommandStore()
-        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", False)
+        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", None,  False)
         self.assertTrue(store.hasCommandByName("vim somefile.txt"))
         self.assertTrue(store.hasCommandByName("rm somefile.txt"))
         self.assertTrue(store.hasCommandByName("whereis script"))
         self.assertTrue(store.hasCommandByName("vim /usr/bin/script"))
+        self.assertFalse(store.hasCommandByName("vim somefil"))
+        self.assertEqual(2, store.getCommandByName("rm somefile.txt").getCountSeen())
+
+    def test_readFile_withIgnoreFile(self):
+        file_name = "test_files/test_input.txt"
+        store = command_store_lib.CommandStore()
+        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", "test_files/test_ignore_rule.txt",  False)
+        self.assertFalse(store.hasCommandByName("vim somefile.txt"))
+        self.assertTrue(store.hasCommandByName("rm somefile.txt"))
+        self.assertTrue(store.hasCommandByName("whereis script"))
+        self.assertFalse(store.hasCommandByName("vim /usr/bin/script"))
         self.assertFalse(store.hasCommandByName("vim somefil"))
         self.assertEqual(2, store.getCommandByName("rm somefile.txt").getCountSeen())
     
@@ -76,7 +87,7 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_delete_whenExists_shouldDeleteFromStore(self):
         file_name = "test_files/test_input.txt"
         store = command_store_lib.CommandStore()
-        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", False)
+        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", None, False)
         self.assertTrue(store.hasCommandByName("vim somefile.txt"))
         self.assertIsNotNone(store.deleteCommand('vim somefile.txt'))
         self.assertFalse(store.hasCommandByName("vim somefile.txt"))
@@ -84,6 +95,17 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_delete_whenDoesntExists_shouldDeleteFromStore(self):
         store = command_store_lib.CommandStore()
         self.assertIsNone(store.deleteCommand('anything'))
+
+    def test_ignoreRule_whenCreate_shouldCreateWorkingIgnoreRule(self):
+        file_name = "test_files/test_ignore_rule.txt"
+        ignore_rule = command_store_lib.IgnoreRules.createIgnoreRule(file_name)
+        self.assertTrue(ignore_rule.isMatch('vim opensomefile'))
+        self.assertFalse(ignore_rule.isMatch('svim opensomefile'))
+        self.assertTrue(ignore_rule.isMatch('vim foo'))
+        self.assertFalse(ignore_rule.isMatch('svim foos'))
+        self.assertTrue(ignore_rule.isMatch('git commit -a -m'))
+        self.assertFalse(ignore_rule.isMatch('git comit -a -m'))
+        self.assertFalse(ignore_rule.isMatch('git foos'))
 
 
 if __name__ == '__main__':

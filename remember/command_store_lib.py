@@ -8,8 +8,7 @@ import string
 
 
 PROCCESSED_TO_TAG = '****** previous commands read *******'
-PICKLE_FILE_PATH = 'pickle_file.pickle'
-LOG_DIR = '/Users/behrooz/Minzies/logging/remember_logs/'
+PICKLE_FILE_NAME = 'pickle_file.pickle'
 FILE_STORE_NAME = 'command_storage.txt'
 
 
@@ -62,7 +61,45 @@ class CommandStore:
 		for command in commands:
 			print command.getUniqueCommandId() +  " --count:" + str(command.getCountSeen())
 
+class IgnoreRules:
+	def __init__(self):
+		self._start_with = []
+		self._contains = []
+		self._matches = set()
 
+	def isMatch(self, command_str):
+		if command_str in self._matches:
+			return True
+		for val in self._start_with:
+			if command_str.startswith(val):
+				return True
+		for val in self._contains:
+			if val in command_str:
+				return True
+		return False
+
+	def addStartsWith(self, command_str):
+		self._start_with.append(command_str)
+
+	def addContains(self, command_str):
+		self._contains.append(command_str)
+
+	def addMatches(self, command_str):
+		self._matches.add(command_str)
+
+	@staticmethod
+	def createIgnoreRule(srcFile):
+		ignoreRules = IgnoreRules()
+		methods = {
+		's' : ignoreRules.addStartsWith,
+		'c' : ignoreRules.addContains,
+		'm' : ignoreRules.addMatches,
+		}
+		for line in reversed(open(srcFile).readlines()):
+			split = line.split(":", 1)
+			if len(split) == 2:
+				methods[split[0]](split[1].strip())
+		return ignoreRules
 
 
 class Command:
@@ -72,7 +109,7 @@ class Command:
 		self._context_after = set()
 		self._manual_comments = "Place any comments here."
 		self.setPrimaryCommand(self._command_str)
-    		self._count_seen = 1
+		self._count_seen = 1
 
 	def setPrimaryCommand(self, command):
 		command_split = command.split(" ")
@@ -110,17 +147,19 @@ def getUnReadCommands(srcFile):
 	return unproccessed_lines
 
 
-def getDefaultFile():
-	return os.path.join(LOG_DIR, FILE_STORE_NAME)
-
-
-def readHistoryFile(store, srcFile, store_file=getDefaultFile(), markRead=True):
+def readHistoryFile(store, srcFile, store_file, ignore_file=None, markRead=True):
 	
 	commands = getUnReadCommands(srcFile)
 	output = []
+	if ignore_file:
+		ignore_rules = IgnoreRules.createIgnoreRule(ignore_file)
+	else:
+		ignore_rules = IgnoreRules()
 
 	for line in commands:
 		command = Command(line)
+		if ignore_rules.isMatch(command.getUniqueCommandId()):
+			continue
 		store.addCommand(command)
 		output.append(command.getUniqueCommandId())
 	if markRead:
@@ -131,7 +170,7 @@ def readHistoryFile(store, srcFile, store_file=getDefaultFile(), markRead=True):
 			myfile.write(PROCCESSED_TO_TAG + "\n")
 		
 def getPickleFilePath(directory_path):
-	return os.path.join(directory_path, PICKLE_FILE_PATH)
+	return os.path.join(directory_path, PICKLE_FILE_NAME)
 
 
 def getCommandStore(file_name):

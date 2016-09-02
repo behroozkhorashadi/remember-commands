@@ -23,6 +23,9 @@ class CommandStore:
 		else:
 			self._command_dict[command.getUniqueCommandId()].incrementCount()
 
+	def deleteCommand(self, command_str):
+		del self._command_dict[command_str]
+
 	def hasCommand(self, command):
 		return command.getUniqueCommandId() in self._command_dict
 

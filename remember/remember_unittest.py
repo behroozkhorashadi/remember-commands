@@ -23,7 +23,6 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(command, command_store.getCommandByName(command_str))
         self.assertEqual(None, command_store.getCommandByName("non existent command string"))
 
-
     def test_getPrimaryCommand_CheckcorrectlyIdPrimaryCommand(self):
         command_str = "some command string"
         command = command_store_lib.Command(command_str)
@@ -41,7 +40,6 @@ class TestCommandStoreLib(unittest.TestCase):
         command = command_store_lib.Command("git branch")
         self.assertEqual("git branch", command.getUniqueCommandId())
 
-
     def test_readFile(self):
         file_name = "test_files/test_input.txt"
         store = command_store_lib.CommandStore()
@@ -52,7 +50,6 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertTrue(store.hasCommandByName("vim /usr/bin/script"))
         self.assertFalse(store.hasCommandByName("vim somefil"))
         self.assertEqual(2, store.getCommandByName("rm somefile.txt").getCountSeen())
-
     
     def test_verifyPickle(self):
         file_name = "test_pickle.txt"
@@ -65,7 +62,6 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertTrue(command_store.hasCommand(command))
         os.remove(file_name)
 
-
     def test_readUnproccessedLinesOnly(self):
         file_name = "test_files/test_processed.txt"
         unread_commands = command_store_lib.getUnReadCommands(file_name)
@@ -77,6 +73,17 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual("git foo", command_store_lib.Command.getCurratedCommand("    git     foo"))
         self.assertEqual(". git foo", command_store_lib.Command.getCurratedCommand(" .   git     foo"))
 
+    def test_delete_whenExists_shouldDeleteFromStore(self):
+        file_name = "test_files/test_input.txt"
+        store = command_store_lib.CommandStore()
+        command_store_lib.readHistoryFile(store, file_name, "doesntmatter", False)
+        self.assertTrue(store.hasCommandByName("vim somefile.txt"))
+        self.assertIsNotNone(store.deleteCommand('vim somefile.txt'))
+        self.assertFalse(store.hasCommandByName("vim somefile.txt"))
+
+    def test_delete_whenDoesntExists_shouldDeleteFromStore(self):
+        store = command_store_lib.CommandStore()
+        self.assertIsNone(store.deleteCommand('anything'))
 
 
 if __name__ == '__main__':

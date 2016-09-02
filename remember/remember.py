@@ -5,9 +5,7 @@ import sys
 import argparse
 
 
-
 def main():
-	# args = sys.argv
 	parser = argparse.ArgumentParser()
 	parser.add_argument("file", help="The directory path. ex: ~/dir/where/picklefile/is")
 	parser.add_argument("query", help="The term to search for. ex: 'git pull' or git")

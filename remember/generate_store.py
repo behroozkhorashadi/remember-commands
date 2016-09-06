@@ -1,15 +1,16 @@
 #! /usr/bin/env python
+""" This module generates the store pickle file."""
 
-import sys
-import command_store_lib as com_lib
-import os.path
 import argparse
+import os.path
+import command_store_lib as com_lib
 
 FILE_STORE_NAME = 'command_storage.txt'
 IGNORE_RULE_FILE_NAME = 'ignore_rules.txt'
 
 
 def main():
+    """Main entry point for this module."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "historyfile",

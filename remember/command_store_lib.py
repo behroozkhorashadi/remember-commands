@@ -29,7 +29,7 @@ class CommandStore(object):
             self._command_dict[command.get_unique_command_id()] = command
         else:
             self._command_dict[command.get_unique_command_id()]\
-            .increment_count()
+                .increment_count()
 
     def delete_command(self, command_str):
         """This method deletes a command from the store. """
@@ -54,11 +54,14 @@ class CommandStore(object):
             return self._command_dict[command_str]
         return None
 
-    def search_commands(self, command_str):
+    def search_commands(self, command_str, starts_with=False):
         """This method searches the command store for the command given. """
         matches = []
         for _, command in self._command_dict.iteritems():
-            if command_str in command.get_unique_command_id():
+            if starts_with:
+                if command.get_unique_command_id().startswith(command_str):
+                    matches.append(command)
+            elif command_str in command.get_unique_command_id():
                 matches.append(command)
         return matches
 
@@ -89,6 +92,9 @@ class IgnoreRules(object):
 
     def is_match(self, command_str):
         """ If the command matches any of the ignore rules returns true."""
+        # ignore all empty strings.
+        if not command_str:
+            return True
         if command_str in self._matches:
             return True
         for val in self._start_with:
@@ -129,10 +135,10 @@ class IgnoreRules(object):
         return ignore_rules
 
 
-class Command:
+class Command(object):
     """This class holds the basic pieces for a command."""
 
-    def __init__(self, command_str):
+    def __init__(self, command_str=""):
         self._command_str = Command.get_currated_command(command_str)
         self._context_before = set()
         self._context_after = set()

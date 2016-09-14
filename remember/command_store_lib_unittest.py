@@ -20,6 +20,8 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertIsNotNone(matches)
         matches = store.search_commands("add", True)
         self.assertTrue(len(matches) == 0)
+        matches = store.search_commands("subl", True)
+        self.assertTrue(len(matches) == 1)
 
     def test_addCommandToStore(self):
         command_store = command_store_lib.CommandStore()
@@ -85,6 +87,14 @@ class TestCommandStoreLib(unittest.TestCase):
         command_store = command_store_lib.CommandStore.load_command_store(file_name)
         self.assertTrue(command_store.has_command(command))
         os.remove(file_name)
+
+    def test_verify_read_pickle_file(self):
+        file_name = "test_files/test_pickle.txt"
+        store = command_store_lib.get_command_store(file_name)
+        matches = store.search_commands("", False)
+        self.assertTrue(len(matches) > 0)
+        matches = store.search_commands("rm", True)
+        self.assertTrue(len(matches) == 1)
 
     def test_readUnproccessedLinesOnly(self):
         file_name = "test_files/test_processed.txt"

@@ -16,11 +16,11 @@ class TestCommandStoreLib(unittest.TestCase):
         file_name = "test_files/test_input.txt"
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
-        matches = store.search_commands("add")
+        matches = store.search_commands(["add"])
         self.assertIsNotNone(matches)
-        matches = store.search_commands("add", True)
+        matches = store.search_commands(["add"], True)
         self.assertTrue(len(matches) == 0)
-        matches = store.search_commands("subl", True)
+        matches = store.search_commands(["subl"], True)
         self.assertTrue(len(matches) == 1)
 
     def test_addCommandToStore(self):
@@ -91,10 +91,12 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_verify_read_pickle_file(self):
         file_name = "test_files/test_pickle.txt"
         store = command_store_lib.get_command_store(file_name)
-        matches = store.search_commands("", False)
+        matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
-        matches = store.search_commands("rm", True)
+        matches = store.search_commands(["rm"], True)
         self.assertTrue(len(matches) == 1)
+        self.assertEqual(matches[0].get_unique_command_id(), 'rm somefile.txt')
+        self.assertEqual(matches[0].get_count_seen(), 2)
 
     def test_readUnproccessedLinesOnly(self):
         file_name = "test_files/test_processed.txt"
@@ -139,6 +141,15 @@ class TestCommandStoreLib(unittest.TestCase):
             store, file_name, "doesntmatter", "test_files/fileNotthere.txt",
             False)
 
+    def test_command_parseArgs(self):
+        command_str = 'git diff HEAD^ src/b/FragmentOnlyDetector.java'
+        command = command_store_lib.Command(command_str)
+        self.assertEqual(command.get_primary_command(), 'git')
+        self.assertEqual(command.get_command_args(), ['diff', 'HEAD^', 'src/b/FragmentOnlyDetector.java'])
+        command_str = 'git'
+        command = command_store_lib.Command(command_str)
+        self.assertEqual(command.get_primary_command(), 'git')
+        self.assertEqual(command.get_command_args(), [])
 
 if __name__ == '__main__':
     unittest.main()

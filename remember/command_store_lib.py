@@ -54,14 +54,16 @@ class CommandStore(object):
             return self._command_dict[command_str]
         return None
 
-    def search_commands(self, command_str, starts_with=False):
-        """This method searches the command store for the command given. """
+    def search_commands(self, command_strs, starts_with=False):
+        """This method searches the command store for the command given."""
         matches = []
         for _, command in self._command_dict.iteritems():
             if starts_with:
-                if command.get_unique_command_id().startswith(command_str):
-                    matches.append(command)
-            elif command_str in command.get_unique_command_id():
+                if (not command.get_unique_command_id()
+                        .startswith(command_strs[0])):
+                    continue
+            if all(cmd_search in command.get_unique_command_id()
+                    for cmd_search in command_strs):
                 matches.append(command)
         return matches
 
@@ -143,16 +145,22 @@ class Command(object):
         self._context_before = set()
         self._context_after = set()
         self._manual_comments = "Place any comments here."
-        self.set_primary_command(self._command_str)
+        self._parse_command(self._command_str)
         self._count_seen = 1
 
-    def set_primary_command(self, command):
+    def _parse_command(self, command):
         """Set the primary command."""
         command_split = command.split(" ")
         if command_split[0] == ".":
             self._primary_command = command_split[1]
+            self._command_args = command_split[2:]
         else:
             self._primary_command = command_split[0]
+            self._command_args = command_split[1:]
+
+    def get_command_args(self):
+        """Get the input ars for the command"""
+        return self._command_args
 
     def get_primary_command(self):
         """Get the primary command."""

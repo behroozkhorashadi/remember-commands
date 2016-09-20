@@ -12,21 +12,22 @@ def main():
     """Entry point for this executable python module."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "file",
-        help="The directory path. ex: ~/dir/where/picklefile/is")
-    parser.add_argument(
-        "query",
-        help="The term to search for. ex: 'git pull' or git")
-    parser.add_argument(
         "-d",
         "--delete",
-        help="Delete commands",
+        help="Delete mode where you able to delete commands from the store.",
         action="store_true")
     parser.add_argument(
         "-s",
         "--startswith",
         help="Show only commands that strictly start with input command.",
         action="store_true")
+    parser.add_argument(
+        "file",
+        help="The directory path. ex: ~/dir/where/picklefile/is")
+    parser.add_argument(
+        "query",
+        nargs='+',
+        help="The term to search for. ex: 'git pull' or git")
     args = parser.parse_args()
     if not args.file:
         print """To many or too few args.\n$> remember.py [
@@ -34,7 +35,7 @@ def main():
         return
     pickle_file_path = command_store_lib.get_pickle_file_path(args.file)
     store = command_store_lib.get_command_store(pickle_file_path)
-    print 'Looking for all past commands with: ' + args.query
+    print 'Looking for all past commands with: ' + ", ".join(args.query)
     result = store.search_commands(args.query, args.startswith)
     print "Number of results found: " + str(len(result))
     command_store_lib.CommandStore.print_commands(result)

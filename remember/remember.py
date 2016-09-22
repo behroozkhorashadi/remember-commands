@@ -22,6 +22,11 @@ def main():
         help="Show only commands that strictly start with input command.",
         action="store_true")
     parser.add_argument(
+        "-i",
+        "--interactive",
+        help="Excectue the searched commands.",
+        action="store_true")
+    parser.add_argument(
         "file",
         help="The directory path. ex: ~/dir/where/picklefile/is")
     parser.add_argument(
@@ -35,6 +40,11 @@ def main():
         return
     pickle_file_path = command_store_lib.get_pickle_file_path(args.file)
     store = command_store_lib.get_command_store(pickle_file_path)
+    if args.interactive:
+        command_executor = command_store_lib.InteractiveCommandExecutor(store)
+        if not command_executor.run(args.query, args.startswith):
+            print 'Exit'
+        return
     print 'Looking for all past commands with: ' + ", ".join(args.query)
     result = store.search_commands(args.query, args.startswith)
     print "Number of results found: " + str(len(result))

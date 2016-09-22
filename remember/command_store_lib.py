@@ -5,6 +5,7 @@ This Module contains the core logic for the remember functions.
 import cPickle as pickle
 import os.path
 import re
+import subprocess
 
 
 PROCCESSED_TO_TAG = '****** previous commands read *******'
@@ -29,7 +30,7 @@ class CommandStore(object):
             self._command_dict[command.get_unique_command_id()] = command
         else:
             self._command_dict[command.get_unique_command_id()]\
-                .increment_count()
+                ._increment_count()
 
     def delete_command(self, command_str):
         """This method deletes a command from the store. """
@@ -160,6 +161,10 @@ class Command(object):
 
     def get_command_args(self):
         """Get the input ars for the command"""
+        # This is for backwards compatability with earlier picked clases that
+        # didn't have this field.
+        if not hasattr(self, '_command_args'):
+            self._parse_command(self.get_unique_command_id())
         return self._command_args
 
     def get_primary_command(self):
@@ -170,7 +175,7 @@ class Command(object):
         """Get the commands unique id."""
         return self._command_str
 
-    def increment_count(self):
+    def _increment_count(self):
         """Increment the count of the command."""
         self._count_seen += 1
 
@@ -183,6 +188,40 @@ class Command(object):
         """Given a command string currate the string and return."""
         currated_command = re.sub(' +', ' ', command_str.strip())
         return currated_command
+
+
+class InteractiveCommandExecutor(object):
+    def __init__(self, command_store):
+        self._command_store = command_store
+
+    def run(self, query_list, starts_with=False):
+        result = self._command_store.search_commands(query_list,
+                                                     starts_with)
+        self._enumerate_commands(result)
+        return self._select_command(result)
+
+    def _enumerate_commands(self, command_results):
+        for idx, command in enumerate(command_results):
+            print "(" + str(idx+1) + ") " + command.get_unique_command_id()
+
+    def _select_command(self, command_results):
+        user_input = raw_input('Choose command by # or ' +
+                               'type anything else to quit: ')
+        value = represents_int(user_input)
+        if value and value < len(command_results) and value > 0:
+            command = command_results[value-1]
+            subprocess.call([command.get_primary_command(),
+                             " ".join(command.get_command_args())])
+            return True
+        else:
+            return False
+
+
+def represents_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        return False
 
 
 def get_unread_commands(src_file):

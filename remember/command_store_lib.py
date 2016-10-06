@@ -210,8 +210,8 @@ class InteractiveCommandExecutor(object):
         value = represents_int(user_input)
         if value and value < len(command_results) and value > 0:
             command = command_results[value-1]
-            subprocess.call([command.get_primary_command(),
-                             " ".join(command.get_command_args())])
+            subprocess.call([command.get_primary_command()]
+                + command.get_command_args())
             return True
         else:
             return False

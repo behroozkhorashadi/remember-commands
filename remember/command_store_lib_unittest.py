@@ -6,6 +6,7 @@ import unittest
 import command_store_lib
 import os
 
+
 class TestCommandStoreLib(unittest.TestCase):
 
     def test_CommandStore_isEmpty(self):
@@ -32,8 +33,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertTrue(command_store.has_command(command))
         self.assertFalse(command_store.has_command(command_store_lib.Command("some other command")))
         self.assertEqual(1, command_store.get_num_commands())
-        self.assertEqual(command,\
-            command_store.get_command_by_name(command_str))
+        self.assertEqual(command, command_store.get_command_by_name(command_str))
         self.assertEqual(None, command_store.get_command_by_name("non existent command string"))
 
     def test_getPrimaryCommand_CheckcorrectlyIdPrimaryCommand(self):
@@ -112,8 +112,7 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_delete_whenExists_shouldDeleteFromStore(self):
         file_name = "test_files/test_input.txt"
         store = command_store_lib.CommandStore()
-        command_store_lib.read_history_file(store, file_name,
-            "doesntmatter", None, False)
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
         self.assertTrue(store.has_command_by_name("vim somefile.txt"))
         self.assertIsNotNone(store.delete_command('vim somefile.txt'))
         self.assertFalse(store.has_command_by_name("vim somefile.txt"))

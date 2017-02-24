@@ -24,6 +24,20 @@ class TestCommandStoreLib(unittest.TestCase):
         matches = store.search_commands(["subl"], True)
         self.assertTrue(len(matches) == 1)
 
+    def test_search_commands_sorted(self):
+        command_store = command_store_lib.CommandStore()
+        self.assertEqual(0, command_store.get_num_commands())
+        command_str = "some command string"
+        command = command_store_lib.Command(command_str, 10.0)
+        command_store.add_command(command)
+        command_str2 = "somelater command string"
+        command2 = command_store_lib.Command(command_str2, 20.0)
+        command_store.add_command(command2)
+
+        result =  command_store.search_commands("some", starts_with=False, sort=True)
+        self.assertEquals(result[0], command2)
+        self.assertEquals(result[1], command)
+
     def test_addCommandToStore(self):
         command_store = command_store_lib.CommandStore()
         self.assertEqual(0, command_store.get_num_commands())
@@ -98,6 +112,13 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(matches[0].get_unique_command_id(), 'rm somefile.txt')
         self.assertEqual(matches[0].get_count_seen(), 2)
 
+    def test_verify_read_pickle_file_time(self):
+        file_name = "test_files/test_pickle.txt"
+        store = command_store_lib.get_command_store(file_name)
+        matches = store.search_commands([""], False)
+        for m in matches:
+            self.assertEqual(0, m.last_used_time())
+
     def test_readUnproccessedLinesOnly(self):
         file_name = "test_files/test_processed.txt"
         unread_commands = command_store_lib.get_unread_commands(file_name)
@@ -142,13 +163,19 @@ class TestCommandStoreLib(unittest.TestCase):
 
     def test_command_parseArgs(self):
         command_str = 'git diff HEAD^ src/b/FragmentOnlyDetector.java'
-        command = command_store_lib.Command(command_str)
+        command = command_store_lib.Command(command_str, 1234.1234)
         self.assertEqual(command.get_primary_command(), 'git')
         self.assertEqual(command.get_command_args(), ['diff', 'HEAD^', 'src/b/FragmentOnlyDetector.java'])
+        self.assertEqual(1234.1234, command.last_used_time())
         command_str = 'git'
-        command = command_store_lib.Command(command_str)
+        command = command_store_lib.Command(command_str, 1234.1234)
         self.assertEqual(command.get_primary_command(), 'git')
         self.assertEqual(command.get_command_args(), [])
+        self.assertEqual(1234.1234, command.last_used_time())
+        command._increment_count()
+        self.assertEqual(1234.1234, command.last_used_time())
+        command._update_time(4321)
+        self.assertEqual(4321, command.last_used_time())
 
 if __name__ == '__main__':
     unittest.main()

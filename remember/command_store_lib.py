@@ -6,11 +6,13 @@ import cPickle as pickle
 import os.path
 import re
 import subprocess
+import time
 
 
 PROCCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
 FILE_STORE_NAME = 'command_storage.txt'
+COMMAND_CMP = lambda x, y: cmp(y.last_used_time(), x.last_used_time())
 
 
 class CommandStore(object):
@@ -29,8 +31,9 @@ class CommandStore(object):
         if command.get_unique_command_id() not in self._command_dict:
             self._command_dict[command.get_unique_command_id()] = command
         else:
-            self._command_dict[command.get_unique_command_id()]\
-                ._increment_count()
+            store_command = self._command_dict[command.get_unique_command_id()]
+            store_command._increment_count()
+            store_command._update_time(command.last_used_time())
 
     def delete_command(self, command_str):
         """This method deletes a command from the store. """
@@ -55,7 +58,7 @@ class CommandStore(object):
             return self._command_dict[command_str]
         return None
 
-    def search_commands(self, command_strs, starts_with=False):
+    def search_commands(self, command_strs, starts_with=False, sort=True):
         """This method searches the command store for the command given."""
         matches = []
         for _, command in self._command_dict.iteritems():
@@ -66,6 +69,8 @@ class CommandStore(object):
             if all(cmd_search in command.get_unique_command_id()
                     for cmd_search in command_strs):
                 matches.append(command)
+        if sort:
+            matches.sort(COMMAND_CMP)
         return matches
 
     @staticmethod
@@ -141,13 +146,14 @@ class IgnoreRules(object):
 class Command(object):
     """This class holds the basic pieces for a command."""
 
-    def __init__(self, command_str=""):
+    def __init__(self, command_str="", last_used=time.time()):
         self._command_str = Command.get_currated_command(command_str)
         self._context_before = set()
         self._context_after = set()
         self._manual_comments = "Place any comments here."
         self._parse_command(self._command_str)
         self._count_seen = 1
+        self._last_used = last_used
 
     def _parse_command(self, command):
         """Set the primary command."""
@@ -175,13 +181,23 @@ class Command(object):
         """Get the commands unique id."""
         return self._command_str
 
+    def get_count_seen(self):
+        """Get the count seen."""
+        return self._count_seen
+
     def _increment_count(self):
         """Increment the count of the command."""
         self._count_seen += 1
 
-    def get_count_seen(self):
-        """Get the count seen."""
-        return self._count_seen
+    def _update_time(self, updated_time):
+        """Update the time to this new time."""
+        self._last_used = updated_time
+
+    def last_used_time(self):
+        """Get the last used time in seconds from epoch"""
+        if not hasattr(self, '_last_used'):
+            self._last_used = 0
+        return self._last_used
 
     @staticmethod
     def get_currated_command(command_str):
@@ -208,10 +224,9 @@ class InteractiveCommandExecutor(object):
         user_input = raw_input('Choose command by # or ' +
                                'type anything else to quit: ')
         value = represents_int(user_input)
-        if value and value < len(command_results) and value > 0:
+        if value and value <= len(command_results) and value > 0:
             command = command_results[value-1]
-            subprocess.call([command.get_primary_command()]
-                            + command.get_command_args())
+            subprocess.call(command.get_unique_command_id(), shell=True)
             return True
         else:
             return False
@@ -248,9 +263,11 @@ def read_history_file(
         ignore_rules = IgnoreRules.create_ignore_rule(ignore_file)
     else:
         ignore_rules = IgnoreRules()
-
+    # get the max count
+    current_time = time.time()
     for line in commands:
-        command = Command(line)
+        current_time += 1
+        command = Command(line, current_time)
         if ignore_rules.is_match(command.get_unique_command_id()):
             continue
         store.add_command(command)
@@ -270,10 +287,10 @@ def get_pickle_file_path(directory_path):
 
 def get_command_store(file_name):
     """Get the command store from the input file."""
-    store = CommandStore()
     if os.path.isfile(file_name):
         print 'Unpacking pickle file ' + file_name
         store = CommandStore.load_command_store(file_name)
     else:
+        store = CommandStore()
         print 'File not found: ' + file_name
     return store

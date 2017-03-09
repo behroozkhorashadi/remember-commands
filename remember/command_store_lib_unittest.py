@@ -6,6 +6,8 @@ import unittest
 import command_store_lib
 import os
 
+TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
+
 
 class TestCommandStoreLib(unittest.TestCase):
 
@@ -14,7 +16,8 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(0, command_store.get_num_commands())
 
     def test_search_commands(self):
-        file_name = "test_files/test_input.txt"
+
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
         matches = store.search_commands(["add"])
@@ -68,7 +71,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual("git branch", command.get_unique_command_id())
 
     def test_readFile(self):
-        file_name = "test_files/test_input.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
         self.assertTrue(store.has_command_by_name("vim somefile.txt"))
@@ -80,9 +83,10 @@ class TestCommandStoreLib(unittest.TestCase):
             .get_count_seen())
 
     def test_readFile_withIgnoreFile(self):
-        file_name = "test_files/test_input.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
+        ignore_file = os.path.join(TEST_PATH_DIR, "test_files/test_ignore_rule.txt")
         store = command_store_lib.CommandStore()
-        command_store_lib.read_history_file(store, file_name, "doesntmatter", "test_files/test_ignore_rule.txt",  False)
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", ignore_file,  False)
         self.assertFalse(store.has_command_by_name("vim somefile.txt"))
         self.assertTrue(store.has_command_by_name("rm somefile.txt"))
         self.assertTrue(store.has_command_by_name("whereis script"))
@@ -92,7 +96,7 @@ class TestCommandStoreLib(unittest.TestCase):
             .get_count_seen())
 
     def test_verifyPickle(self):
-        file_name = "test_pickle.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_pickle.txt")
         command_store = command_store_lib.CommandStore()
         command_str = "git branch"
         command = command_store_lib.Command(command_str)
@@ -103,7 +107,7 @@ class TestCommandStoreLib(unittest.TestCase):
         os.remove(file_name)
 
     def test_verify_read_pickle_file(self):
-        file_name = "test_files/test_pickle.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.txt")
         store = command_store_lib.get_command_store(file_name)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
@@ -120,7 +124,7 @@ class TestCommandStoreLib(unittest.TestCase):
             self.assertEqual(0, m.last_used_time())
 
     def test_readUnproccessedLinesOnly(self):
-        file_name = "test_files/test_processed.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_processed.txt")
         unread_commands = command_store_lib.get_unread_commands(file_name)
         self.assertEqual("vim somefile.txt", unread_commands[0])
         self.assertEqual("git commit -a -m \"renamed directory.\"", unread_commands[1])
@@ -131,7 +135,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(". git foo", command_store_lib.Command.get_currated_command(" .   git     foo"))
 
     def test_delete_whenExists_shouldDeleteFromStore(self):
-        file_name = "test_files/test_input.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
         self.assertTrue(store.has_command_by_name("vim somefile.txt"))
@@ -143,7 +147,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertIsNone(store.delete_command('anything'))
 
     def test_ignoreRule_whenCreate_shouldCreateWorkingIgnoreRule(self):
-        file_name = "test_files/test_ignore_rule.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_ignore_rule.txt")
         ignore_rule = command_store_lib.IgnoreRules.create_ignore_rule(
             file_name)
         self.assertTrue(ignore_rule.is_match('vim opensomefile'))
@@ -155,7 +159,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertFalse(ignore_rule.is_match('git foos'))
 
     def test_ignoreRule_whenFileDoestExist_shouldNotCrash(self):
-        file_name = "test_files/test_input.txt"
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(
             store, file_name, "doesntmatter", "test_files/fileNotthere.txt",

@@ -24,7 +24,7 @@ example:
 generate_store.py [path_to_history_file] [path_to_a_save_directory]
 ```
 
-The second arguement is where you want all the meta data from the command organization to be stored. This is going to include a pickle file and some other data used by the remember command.
+The second argument is where you want all the meta data from the command organization to be stored. This is going to include a pickle file and some other data used by the remember command.
 
 This command should be run periodically and will scrap only the commands that haven't been seen yet. I have set it up as a cron job that just runs on my machine every couple days.
 

@@ -49,5 +49,13 @@ s: cd
 ```
 
 ## Using Remember
-./remember.py [path_to_the_save_directory] [options] [text to search]
+./remember.py [path_to_the_save_directory] [path_to_history_file] [options] [text to search]
 
+I've aliased ./remember.py for convenience as follows:
+```
+alias re='~/my_git_repo/remember-commands/remember.py ~/RememberStoreDirectory/ ~/.bash_history'
+```
+and then use it as follows
+```
+re git log
+```

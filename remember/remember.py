@@ -27,21 +27,31 @@ def main():
         help="Excectue the searched commands.",
         action="store_true")
     parser.add_argument(
-        "file",
+        "pickle_dir",
         help="The directory path. ex: ~/dir/where/picklefile/is")
+    parser.add_argument(
+        "history_file_path",
+        help="The path to the history file. ex: ~/.bash_history")
     parser.add_argument(
         "query",
         nargs='+',
         help="The term to search for. ex: 'git pull' or git")
     args = parser.parse_args()
-    if not args.file:
+    if not args.pickle_dir:
         print """To many or too few args.\n$> remember.py [
-                 file_store_directory_path] ['word|phrase to look up']"""
+                 file_store_directory_path] [history_file_path]
+                 ['word|phrase to look up']"""
         return
-    pickle_file_path = command_store_lib.get_pickle_file_path(args.file)
+    if not args.history_file_path:
+        print """To many or too few args.\n$> remember.py [
+                 file_store_directory_path] [history_file_path]
+                 ['word|phrase to look up']"""
+        return
+    pickle_file_path = command_store_lib.get_pickle_file_path(args.pickle_dir)
     store = command_store_lib.get_command_store(pickle_file_path)
     if args.interactive:
-        command_executor = command_store_lib.InteractiveCommandExecutor(store)
+        command_executor = command_store_lib.InteractiveCommandExecutor(
+            store, args.history_file_path)
         if not command_executor.run(args.query, args.startswith):
             print 'Exit'
         return

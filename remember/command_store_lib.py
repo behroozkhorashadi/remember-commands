@@ -207,8 +207,9 @@ class Command(object):
 
 
 class InteractiveCommandExecutor(object):
-    def __init__(self, command_store):
+    def __init__(self, command_store, history_file_path=None):
         self._command_store = command_store
+        self._history_file_path = history_file_path
 
     def run(self, query_list, starts_with=False):
         result = self._command_store.search_commands(query_list,
@@ -226,6 +227,9 @@ class InteractiveCommandExecutor(object):
         value = represents_int(user_input)
         if value and value <= len(command_results) and value > 0:
             command = command_results[value-1]
+            if self._history_file_path:
+                with open(self._history_file_path, "a") as myfile:
+                    myfile.write(command.get_unique_command_id() + '\n')
             subprocess.call(command.get_unique_command_id(), shell=True)
             return True
         else:

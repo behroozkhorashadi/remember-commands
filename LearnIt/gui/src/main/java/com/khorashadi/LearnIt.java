@@ -1,74 +1,95 @@
 package com.khorashadi;
 
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class LearnIt extends Application {
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage stage) {
-//        primaryStage.setTitle("Hello World!");
-//        Button btn = new Button();
-//        btn.setText("Say 'Hello World'");
-//        btn.setOnAction(new EventHandler<ActionEvent>() {
-//
-//            @Override
-//            public void handle(ActionEvent event) {
-//                System.out.println("Hello World!");
-//            }
-//        });
-//
-//        StackPane root = new StackPane();
-//        root.getChildren().add(btn);
-//        primaryStage.setScene(new Scene(root, 300, 250));
-//        primaryStage.show();
-        //Creating a line object
-        //Creating a Path
-        Path path = new Path();
-
-        //Moving to the starting point
-        MoveTo moveTo = new MoveTo(108, 71);
-
-        //Creating 1st line
-        LineTo line1 = new LineTo(321, 161);
-
-        //Creating 2nd line
-        LineTo line2 = new LineTo(126,232);
-
-        //Creating 3rd line
-        LineTo line3 = new LineTo(232,52);
-
-        //Creating 4th line
-        LineTo line4 = new LineTo(269, 250);
-
-        //Creating 4th line
-        LineTo line5 = new LineTo(108, 71);
-
-        //Adding all the elements to the path
-        path.getElements().add(moveTo);
-        path.getElements().addAll(line1, line2, line3, line4, line5);
-
-        //Creating a Group object
-        Group root = new Group(path);
-
-        //Creating a scene object
-        Scene scene = new Scene(root, 600, 300);
-
-        //Setting title to the Stage
-        stage.setTitle("Drawing an arc through a path");
-
-        //Adding scene to the stage
-        stage.setScene(scene);
-
-        //Displaying the contents of the stage
+        stage.setTitle("Learn It");
+        StackPane root = new StackPane();
+        setupComboBox(root);
+        stage.setScene(new Scene(root));
         stage.show();
+    }
+
+    private void setupComboBox(StackPane root) {
+        final GridPane gridPane = new GridPane();
+        gridPane.setPadding(new Insets(10, 10, 10, 10));
+        gridPane.setVgap(5);
+        gridPane.setHgap(5);
+
+        ObservableList<String> options =
+                FXCollections.observableArrayList(
+                        "Remember",
+                        "Name"
+                );
+        final ComboBox comboBox = new ComboBox(options);
+        comboBox.getSelectionModel().selectFirst();
+        comboBox.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (comboBox.getValue() != null &&
+                        !comboBox.getValue().toString().isEmpty()){
+                    switch (comboBox.getValue().toString()) {
+                        case "Remember":
+                            System.out.println("Remember");
+                            setupRemember(gridPane);
+                            //remove any name stuff.
+                            break;
+                        case "Name":
+                            System.out.println("Name");
+                            //remove any remember stuff.
+                            break;
+                    }
+                }
+            }
+        });
+        gridPane.add(comboBox, 0, 0);
+        setupRemember(gridPane);
+        Button saveButton = new Button();
+        saveButton.setText("Save Info");
+        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                System.out.println("Saved");
+            }
+        });
+        gridPane.add(saveButton, 0, 3);
+
+        root.getChildren().add(gridPane);
+
+    }
+
+    private void setupNameRemember(StackPane root) {
+
+    }
+
+    private void setupRemember(GridPane gridPane) {
+        final TextField keyWords = new TextField();
+        keyWords.setPromptText("Key words for tagged for search");
+        gridPane.add(keyWords, 0, 1);
+
+        final TextArea remember = new TextArea();
+        remember.setPromptText("The stuff you want to remember.");
+        gridPane.add(remember, 0, 2);
     }
 }

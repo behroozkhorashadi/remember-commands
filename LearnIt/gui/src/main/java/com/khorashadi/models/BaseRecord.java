@@ -18,6 +18,7 @@ public abstract class BaseRecord {
     public BaseRecord(String userTags, String mainInfo, SaveType saveType) {
         this(userTags, mainInfo, saveType, LocalDateTime.now());
     }
+
     public BaseRecord(String userTags,
                       String mainInfo,
                       SaveType saveType,

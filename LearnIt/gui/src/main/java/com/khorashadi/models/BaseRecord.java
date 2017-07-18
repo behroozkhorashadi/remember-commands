@@ -1,10 +1,13 @@
 package com.khorashadi.models;
 
+import com.uber.rave.annotation.Validated;
+
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+@Validated(factory = RaveFactory.class)
 public abstract class BaseRecord {
     private final String uuid = UUID.randomUUID().toString();
     private final List<String> userTags;

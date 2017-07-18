@@ -6,7 +6,10 @@ import com.khorashadi.models.BaseRecord;
 
 import java.util.Collection;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -19,6 +22,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
 import static com.khorashadi.main.Interactor.SearchCategory.PEOPLE;
@@ -28,6 +32,7 @@ import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 
 class Search {
     private final TextField searchTerms;
+    private final TextArea textArea;
     private Interactor.SearchCategory searchCategory = GENERAL;
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
@@ -56,15 +61,17 @@ class Search {
         gridPane.add(searchTerms, 0, 0);
         gridPane.add(mainButton, 1, 0);
 
-        final TextArea textArea = new TextArea();
+        textArea = new TextArea();
 
         list.setPrefWidth(150);
         list.setPrefHeight(70);
         gridPane.add(list, 0, 1);
         list.getSelectionModel().selectedItemProperty()
-                .addListener((observable, oldValue, newValue) ->
-                        textArea.setText(UiUtils.getSaveInfoDisplayFormat(newValue)));
-
+                .addListener((observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        textArea.setText(UiUtils.getSaveInfoDisplayFormat(newValue));
+                    }
+                });
         textArea.setEditable(false);
         gridPane.add(textArea, 1, 1);
         setupSearchKeyboardShortcuts(scene);
@@ -73,6 +80,8 @@ class Search {
     void showFindDialog() {
         searchTerms.clear();
         searchTerms.requestFocus();
+        textArea.clear();
+        list.getSelectionModel().clearSelection();
         searchStage.show();
     }
 

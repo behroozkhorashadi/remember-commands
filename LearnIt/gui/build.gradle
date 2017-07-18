@@ -1,4 +1,6 @@
 apply plugin: 'java'
+apply plugin: "net.ltgt.apt"
+apply plugin: 'idea'
 
 repositories {
     jcenter()
@@ -10,6 +12,9 @@ dependencies {
     compile 'com.dropbox.core:dropbox-core-sdk:3.0.3'
     compile 'com.squareup.moshi:moshi:1.5.0'
     compile group: 'com.google.code.findbugs', name: 'jsr305', version: '1.3.9'
+    compile 'com.uber:rave:2.0.0'
+
+    apt 'com.uber:rave-compiler:2.0.0'
 
     testCompile 'junit:junit:4.12'
 }

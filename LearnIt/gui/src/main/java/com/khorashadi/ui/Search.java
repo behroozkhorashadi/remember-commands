@@ -76,7 +76,7 @@ public class Search {
             @Override
             public void changed(ObservableValue<? extends SaveInfo> observable, SaveInfo oldValue,
                                 SaveInfo newValue) {
-                textArea.setText(newValue.getFullDisplayFormat());
+                textArea.setText(UiUtils.getSaveInfoDisplayFormat(newValue));
             }
         });
 

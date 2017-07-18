@@ -1,6 +1,7 @@
 package com.khorashadi.store;
 
 
+import com.khorashadi.models.DateJsonAdapter;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 
@@ -23,7 +24,9 @@ public class MoshiFileWriter<T> {
                     "a directory: " + dirPath);
         }
         file = new File(dirPath, fileName);
-        Moshi moshi = new Moshi.Builder().build();
+        Moshi moshi = new Moshi.Builder()
+                .add(new DateJsonAdapter())
+                .build();
         jsonAdapter = moshi.adapter(classType);
     }
 

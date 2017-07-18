@@ -1,5 +1,7 @@
 package com.khorashadi.ui;
 
+import com.khorashadi.models.SaveInfo;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -34,5 +36,9 @@ public class UiUtils {
                 }
             });
         }
+    }
+
+    static String getSaveInfoDisplayFormat(SaveInfo saveInfo) {
+        return saveInfo.getMainInfo();
     }
 }

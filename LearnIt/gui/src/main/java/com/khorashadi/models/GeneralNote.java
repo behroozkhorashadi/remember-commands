@@ -1,7 +1,7 @@
 package com.khorashadi.models;
 
 
-public final class GeneralNote extends SaveInfo{
+public final class GeneralNote extends SaveInfo {
 
     public GeneralNote(String userTags, String mainInfo) {
         super(userTags, mainInfo);

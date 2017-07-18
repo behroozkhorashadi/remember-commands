@@ -1,7 +1,9 @@
 package com.khorashadi.models;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class SaveInfo {
@@ -30,6 +32,7 @@ public abstract class SaveInfo {
     public List<String> getUserTags() {
         return userTags;
     }
+
     public String getMainInfo() {
         return mainInfo;
     }

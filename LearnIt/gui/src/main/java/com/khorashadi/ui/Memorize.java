@@ -3,15 +3,12 @@ package com.khorashadi.ui;
 import com.khorashadi.main.Interactor;
 
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -20,7 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import static com.khorashadi.ui.UiUtils.setupKeyActions;
-import static javafx.scene.input.KeyEvent.*;
+import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 
 public class Memorize extends Application {
 
@@ -97,7 +94,7 @@ public class Memorize extends Application {
         gridPane.setHgap(5);
         setupKeyboardShortcuts(scene, gridPane);
         gridPane.add(instructions, 0, INSTRUCTIONS);
-        setupNameRemember(gridPane);
+        setupGeneralNote(gridPane);
         root.getChildren().add(gridPane);
     }
 
@@ -125,7 +122,7 @@ public class Memorize extends Application {
     }
 
     private void setupGeneralNote(GridPane gridPane) {
-        setStageTitle("Remember");
+        setStageTitle("General Note");
         reset(gridPane);
         final TextField keyWords = new TextField();
         keyWords.setPromptText("Key words for tagged for search");

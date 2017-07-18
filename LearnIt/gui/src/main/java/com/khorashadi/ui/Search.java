@@ -9,11 +9,9 @@ import java.util.Collection;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -59,8 +57,7 @@ public class Search {
         final Runnable action = new Runnable() {
             @Override
             public void run() {
-                System.out.println("Start Search");
-                displaySearch(interactor.searchData(searchCategory, keyWords.getPromptText()));
+                displaySearch(interactor.searchData(searchCategory, keyWords.getText()));
             }
         };
         final Button mainButton = new Button();
@@ -77,7 +74,8 @@ public class Search {
         gridPane.add(list, 0, 1);
         list.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<SaveInfo>() {
             @Override
-            public void changed(ObservableValue<? extends SaveInfo> observable, SaveInfo oldValue, SaveInfo newValue) {
+            public void changed(ObservableValue<? extends SaveInfo> observable, SaveInfo oldValue,
+                                SaveInfo newValue) {
                 textArea.setText(newValue.getFullDisplayFormat());
             }
         });

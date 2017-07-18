@@ -6,7 +6,6 @@ import com.squareup.moshi.Types;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 import javafx.application.Application;
 

@@ -1,6 +1,6 @@
 package com.khorashadi.ui;
 
-import com.khorashadi.models.SaveInfo;
+import com.khorashadi.models.BaseRecord;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -38,7 +38,7 @@ public class UiUtils {
         }
     }
 
-    static String getSaveInfoDisplayFormat(SaveInfo saveInfo) {
-        return saveInfo.getMainInfo();
+    static String getSaveInfoDisplayFormat(BaseRecord baseRecord) {
+        return baseRecord.getMainInfo();
     }
 }

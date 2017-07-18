@@ -13,7 +13,7 @@ import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 
-public class MoshiFileWriter<T> {
+public class MoshiFileWriter<T> implements Serializer<T>{
     private final JsonAdapter<T> jsonAdapter;
     private final File file;
 
@@ -30,6 +30,7 @@ public class MoshiFileWriter<T> {
         jsonAdapter = moshi.adapter(classType);
     }
 
+    @Override
     public void writeBytes(T object) throws IOException {
         String json = jsonAdapter.toJson(object);
         BufferedSink sink = Okio.buffer(Okio.sink(file));
@@ -37,16 +38,19 @@ public class MoshiFileWriter<T> {
         sink.close();
     }
 
+    @Override
     public boolean fileExists() {
         return file.exists();
     }
 
+    @Override
     public T read() throws IOException {
         BufferedSource source = Okio.buffer(Okio.source(file));
         String json = source.readUtf8();
         return jsonAdapter.fromJson(json);
     }
 
+    @Override
     public T noExceptionRead() {
         try {
             return read();

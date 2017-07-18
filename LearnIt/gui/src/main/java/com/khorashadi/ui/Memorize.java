@@ -57,8 +57,8 @@ public class Memorize extends Application {
         final KeyCombination commandR = new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN);
         scene.addEventHandler(KEY_RELEASED, event -> {
             if (commandR.match(event)) {
-                System.out.println("GeneralNote");
-                setupGeneralNote(gridPane);
+                System.out.println("GeneralRecord");
+                setupGeneralRecord(gridPane);
             }
         });
         final KeyCombination commandF = new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN);
@@ -68,23 +68,20 @@ public class Memorize extends Application {
                 search.showFindDialog();
             }
         });
-        final KeyCombination commandP = new KeyCodeCombination(KeyCode.P, KeyCombination.META_DOWN);
+        final KeyCombination commandP = new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN);
         scene.addEventHandler(KEY_RELEASED, event -> {
             if (commandP.match(event)) {
-                System.out.println("Person");
-                setupNameRemember(gridPane);
+                System.out.println("Name Record");
+                setupNameRecord(gridPane);
             }
         });
         final KeyCombination commandT = new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN);
         scene.addEventHandler(KEY_RELEASED, event -> {
             if (commandT.match(event)) {
                 System.out.println("Task");
-                setupTask(gridPane);
+                setupTaskRecord(gridPane);
             }
         });
-    }
-
-    private void setupTask(GridPane gridPane) {
     }
 
     private void setupUi(StackPane root, Scene scene) {
@@ -94,12 +91,15 @@ public class Memorize extends Application {
         gridPane.setHgap(5);
         setupKeyboardShortcuts(scene, gridPane);
         gridPane.add(instructions, 0, INSTRUCTIONS);
-        setupGeneralNote(gridPane);
+        setupGeneralRecord(gridPane);
         root.getChildren().add(gridPane);
     }
 
-    private void setupNameRemember(GridPane gridPane) {
-        setStageTitle("Remember Person");
+    private void setupTaskRecord(GridPane gridPane) {
+    }
+
+    private void setupNameRecord(GridPane gridPane) {
+        setStageTitle("Remember Name");
         reset(gridPane);
         // maybe add a label.
         final TextField keyWords = new TextField();
@@ -121,8 +121,8 @@ public class Memorize extends Application {
         gridPane.add(mainButton, 0, TEXT_AREA + 1);
     }
 
-    private void setupGeneralNote(GridPane gridPane) {
-        setStageTitle("General Note");
+    private void setupGeneralRecord(GridPane gridPane) {
+        setStageTitle("General Record");
         reset(gridPane);
         final TextField keyWords = new TextField();
         keyWords.setPromptText("Key words for tagged for search");

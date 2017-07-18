@@ -1,49 +1,48 @@
 package com.khorashadi.main;
 
-import com.khorashadi.models.GeneralNote;
+import com.khorashadi.models.GeneralRecord;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Organizer {
 
     Collection<GeneralNoteWrapper> generalNotes = new LinkedList<>();
 
-    public void addGeneralNote(GeneralNote generalNote) {
-        generalNotes.add(new GeneralNoteWrapper(generalNote));
+    public void addGeneralNote(GeneralRecord generalRecord) {
+        generalNotes.add(new GeneralNoteWrapper(generalRecord));
     }
 
-    public Collection<GeneralNote> getGeneralNoteCollection() {
+    public Collection<GeneralRecord> getGeneralNoteCollection() {
         return generalNotes.stream()
-                .map(new Function<GeneralNoteWrapper, GeneralNote>() {
+                .map(new Function<GeneralNoteWrapper, GeneralRecord>() {
                     @Override
-                    public GeneralNote apply(GeneralNoteWrapper generalNoteWrapper) {
-                        return generalNoteWrapper.generalNote;
+                    public GeneralRecord apply(GeneralNoteWrapper generalNoteWrapper) {
+                        return generalNoteWrapper.generalRecord;
                     }
                 })
                 .collect(Collectors.toList());
     }
 
-    public void setGeneralNotes(Collection<GeneralNote> generalNotes) {
-        if (generalNotes == null) {
+    public void setGeneralNotes(Collection<GeneralRecord> generalRecords) {
+        if (generalRecords == null) {
             return;
         }
-        this.generalNotes = generalNotes.stream()
-                .map(new Function<GeneralNote, GeneralNoteWrapper>() {
+        this.generalNotes = generalRecords.stream()
+                .map(new Function<GeneralRecord, GeneralNoteWrapper>() {
                     @Override
-                    public GeneralNoteWrapper apply(GeneralNote generalNote) {
-                        return new GeneralNoteWrapper(generalNote);
+                    public GeneralNoteWrapper apply(GeneralRecord generalRecord) {
+                        return new GeneralNoteWrapper(generalRecord);
                     }
                 })
                 .collect(Collectors.toList());
     }
 
-    public Collection<GeneralNote> searchGeneralNotes(String[] terms) {
+    public Collection<GeneralRecord> searchGeneralNotes(String[] terms) {
         return generalNotes.stream().filter(generalNoteWrapper -> {
             for (String s : terms) {
                 if (generalNoteWrapper.hasTag(s)) {
@@ -51,20 +50,20 @@ public class Organizer {
                 }
             }
             return false;
-        }).map(new Function<GeneralNoteWrapper, GeneralNote>() {
+        }).map(new Function<GeneralNoteWrapper, GeneralRecord>() {
             @Override
-            public GeneralNote apply(GeneralNoteWrapper generalNoteWrapper) {
-                return generalNoteWrapper.generalNote;
+            public GeneralRecord apply(GeneralNoteWrapper generalNoteWrapper) {
+                return generalNoteWrapper.generalRecord;
             }
         }).collect(Collectors.toList());
     }
 
     private static class GeneralNoteWrapper {
         private final Set<String> tagSet = new HashSet<>();
-        private final GeneralNote generalNote;
+        private final GeneralRecord generalRecord;
 
-        private GeneralNoteWrapper(GeneralNote note) {
-            generalNote = note;
+        private GeneralNoteWrapper(GeneralRecord note) {
+            generalRecord = note;
             for (String tag : note.getUserTags()) {
                 tagSet.add(tag);
             }

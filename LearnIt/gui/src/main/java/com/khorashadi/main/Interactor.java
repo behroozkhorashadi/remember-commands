@@ -1,7 +1,8 @@
 package com.khorashadi.main;
 
-import com.khorashadi.models.GeneralNote;
+import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.store.MoshiFileWriter;
+import com.khorashadi.store.Serializer;
 import com.squareup.moshi.Types;
 
 import java.io.IOException;
@@ -10,31 +11,34 @@ import java.util.Collection;
 import javafx.application.Application;
 
 public class Interactor {
-    private final Organizer organizer = new Organizer();
-    private final MoshiFileWriter<Collection<GeneralNote>> gNoteWriter;
+    private final Organizer organizer;
+    private final Serializer<Collection<GeneralRecord>> generalNoteSerializer;
 
     public Interactor(Application.Parameters parameters) {
-        gNoteWriter = new MoshiFileWriter<>(
-                Types.newParameterizedType(Collection.class, GeneralNote.class),
-                parameters.getRaw().get(0), "generalNotes.json");
-        if (gNoteWriter.fileExists()) {
-            organizer.setGeneralNotes(gNoteWriter.noExceptionRead());
+        this(new MoshiFileWriter<>(Types.newParameterizedType(Collection.class, GeneralRecord.class),
+                parameters.getRaw().get(0), "generalNotes.json"), new Organizer());
+    }
+
+    Interactor(Serializer<Collection<GeneralRecord>> serializer, Organizer organizer) {
+        if (serializer.fileExists()) {
+            organizer.setGeneralNotes(serializer.noExceptionRead());
         }
-        System.out.println(String.join(", ", parameters.getRaw()));
+        this.organizer = organizer;
+        generalNoteSerializer = serializer;
     }
 
     public void createGeneralNote(String tags, String mainInfo) {
-        GeneralNote note = new GeneralNote(tags, mainInfo);
+        GeneralRecord note = new GeneralRecord(tags, mainInfo);
         organizer.addGeneralNote(note);
-        Collection<GeneralNote> generalNotes = organizer.getGeneralNoteCollection();
+        Collection<GeneralRecord> generalRecords = organizer.getGeneralNoteCollection();
         try {
-            gNoteWriter.writeBytes(generalNotes);
+            generalNoteSerializer.writeBytes(generalRecords);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Collection<GeneralNote> searchData(SearchCategory searchCategory, String terms) {
+    public Collection<GeneralRecord> searchData(SearchCategory searchCategory, String terms) {
         String[] termSplit = terms.split(" ");
         switch (searchCategory) {
             case GENERAL:

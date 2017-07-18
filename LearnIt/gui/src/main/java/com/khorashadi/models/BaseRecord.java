@@ -9,14 +9,15 @@ public abstract class BaseRecord {
     private final String uuid = UUID.randomUUID().toString();
     private final List<String> userTags;
     private final String userTagsRaw;
-    private final LocalDateTime timePoint;
-    private final SaveType saveType;
 
+    private final LocalDateTime timePoint;
+
+    private final SaveType saveType;
     private String mainInfo;
+
     public BaseRecord(String userTags, String mainInfo, SaveType saveType) {
         this(userTags, mainInfo, saveType, LocalDateTime.now());
     }
-
     public BaseRecord(String userTags,
                       String mainInfo,
                       SaveType saveType,
@@ -29,6 +30,10 @@ public abstract class BaseRecord {
         this.mainInfo = mainInfo;
         timePoint = localDateTime;
         this.saveType = saveType;
+    }
+
+    public LocalDateTime getTimePoint() {
+        return timePoint;
     }
 
     public String getUserTagsRaw() {

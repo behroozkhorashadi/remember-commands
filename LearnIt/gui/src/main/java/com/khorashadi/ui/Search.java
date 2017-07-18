@@ -72,6 +72,7 @@ class Search {
 
     void showFindDialog() {
         searchTerms.clear();
+        searchTerms.requestFocus();
         searchStage.show();
     }
 

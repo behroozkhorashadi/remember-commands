@@ -2,9 +2,6 @@ package com.khorashadi.ui;
 
 import javafx.scene.input.KeyCombination;
 
-/**
- * Created by behrooz on 7/18/17.
- */
 public class KeyComboActionPair {
     private final KeyCombination keyCombination;
     private final Runnable runnable;

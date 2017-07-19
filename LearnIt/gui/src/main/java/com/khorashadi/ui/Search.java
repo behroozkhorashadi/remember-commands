@@ -6,10 +6,7 @@ import com.khorashadi.models.BaseRecord;
 
 import java.util.Collection;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -22,12 +19,10 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
 import static com.khorashadi.main.Interactor.SearchCategory.PEOPLE;
 import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
-import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 
 
 class Search {
@@ -55,9 +50,10 @@ class Search {
         searchTerms.setPromptText("Search");
         final Runnable action = () ->
                 displaySearch(interactor.searchData(searchCategory, searchTerms.getText()));
-        final Button mainButton = new Button();
-        mainButton.setText("Start Search");
-        UiUtils.setupKeyActions(action, mainButton, searchTerms);
+        final Button mainButton = new Button("Start Search");
+        KeyCode[] keyCodes = {KeyCode.ENTER};
+        KeyCombination[] combinations = {};
+        UiUtils.setupSaveKeyActions(action, mainButton, keyCodes, combinations, searchTerms);
         gridPane.add(searchTerms, 0, 0);
         gridPane.add(mainButton, 1, 0);
 
@@ -90,33 +86,18 @@ class Search {
     }
 
     private void setupSearchKeyboardShortcuts(Scene scene) {
-        final KeyCombination commandR = new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandR.match(event)) {
-                System.out.println("Search Memory");
-                searchCategory = GENERAL;
-            }
-        });
-        final KeyCombination commandP = new KeyCodeCombination(KeyCode.P, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandP.match(event)) {
-                System.out.println("Find Person");
-                searchCategory = PEOPLE;
-            }
-        });
-        final KeyCombination commandT = new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandT.match(event)) {
-                System.out.println("Find Task");
-                searchCategory = TASKS;
-            }
-        });
-        final KeyCombination commandW = new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandW.match(event)) {
-                System.out.println("Close Window");
-                searchStage.hide();
-            }
-        });
+        KeyComboActionPair commandR = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
+                () -> searchCategory = GENERAL);
+        KeyComboActionPair commandP = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.P, KeyCombination.META_DOWN),
+                () -> searchCategory = PEOPLE);
+        KeyComboActionPair commandT = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN),
+                () -> searchCategory = TASKS);
+        KeyComboActionPair commandW = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN),
+                () -> searchStage.hide());
+        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW);
     }
 }

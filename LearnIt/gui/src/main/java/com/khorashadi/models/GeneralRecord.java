@@ -1,6 +1,9 @@
 package com.khorashadi.models;
 
+import com.khorashadi.validation.RaveFactory;
+import com.uber.rave.annotation.Validated;
 
+@Validated(factory = RaveFactory.class)
 public final class GeneralRecord extends BaseRecord {
 
     public GeneralRecord(String userTags, String mainInfo) {

@@ -1,5 +1,6 @@
 package com.khorashadi.models;
 
+import com.khorashadi.validation.RaveFactory;
 import com.uber.rave.annotation.Validated;
 
 import java.time.LocalDateTime;

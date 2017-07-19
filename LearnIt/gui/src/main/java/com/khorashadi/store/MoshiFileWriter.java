@@ -47,7 +47,8 @@ public class MoshiFileWriter<T> implements Serializer<T>{
     public T read() throws IOException {
         BufferedSource source = Okio.buffer(Okio.source(file));
         String json = source.readUtf8();
-        return jsonAdapter.fromJson(json);
+        T object = jsonAdapter.fromJson(json);
+        return object;
     }
 
     @Override

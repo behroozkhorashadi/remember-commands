@@ -3,6 +3,7 @@ package com.khorashadi.main;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.store.MoshiFileWriter;
 import com.khorashadi.store.Serializer;
+import com.khorashadi.validation.ObjectValidatorRaveImpl;
 import com.squareup.moshi.Types;
 
 import java.io.IOException;
@@ -16,7 +17,8 @@ public class Interactor {
 
     public Interactor(Application.Parameters parameters) {
         this(new MoshiFileWriter<>(Types.newParameterizedType(Collection.class, GeneralRecord.class),
-                parameters.getRaw().get(0), "generalNotes.json"), new Organizer());
+                parameters.getRaw().get(0), "generalNotes.json"),
+                new Organizer(new ObjectValidatorRaveImpl()));
     }
 
     Interactor(Serializer<Collection<GeneralRecord>> serializer, Organizer organizer) {

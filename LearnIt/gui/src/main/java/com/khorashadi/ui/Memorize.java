@@ -16,19 +16,23 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import static com.khorashadi.ui.UiUtils.setupKeyActions;
+import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
+import static com.khorashadi.main.Interactor.SearchCategory.PEOPLE;
+import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
+import static com.khorashadi.ui.UiUtils.setupSaveKeyActions;
 import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 
 public class Memorize extends Application {
-
+    private static final KeyCode[] KEY_CODES = {};
+    private static final KeyCombination[] KEY_COMBINATIONS
+            = {UiUtils.COMMAND_S, UiUtils.SHIFT_ENTER};
     private static final int INSTRUCTIONS = 0;
     private static final int KEY_WORDS = INSTRUCTIONS + 1;
     private static final int TEXT_AREA = KEY_WORDS + 1;
     private Stage stage;
     private Interactor interactor;
-    private Label instructions
-            = new Label("Ctrl-R for Remember, Ctrl-F for Find, Ctrl-P for Person, "
-            + "Ctrl-N for Note, Ctrl-T for Tasks");
+    private Label instructions = new Label("Cmc-R for General Note, Cmd-F for Find, " +
+            "Cmd-P for Person, Cmd-N for Note, Cmd-T for Tasks");
     private Search search;
 
     public static void main(String[] args) {
@@ -54,34 +58,19 @@ public class Memorize extends Application {
     }
 
     private void setupKeyboardShortcuts(Scene scene, GridPane gridPane) {
-        final KeyCombination commandR = new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandR.match(event)) {
-                System.out.println("GeneralRecord");
-                setupGeneralRecord(gridPane);
-            }
-        });
-        final KeyCombination commandF = new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandF.match(event)) {
-                System.out.println("Find");
-                search.showFindDialog();
-            }
-        });
-        final KeyCombination commandP = new KeyCodeCombination(KeyCode.N, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandP.match(event)) {
-                System.out.println("Name Record");
-                setupNameRecord(gridPane);
-            }
-        });
-        final KeyCombination commandT = new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN);
-        scene.addEventHandler(KEY_RELEASED, event -> {
-            if (commandT.match(event)) {
-                System.out.println("Task");
-                setupTaskRecord(gridPane);
-            }
-        });
+        KeyComboActionPair commandR = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
+                () -> setupGeneralRecord(gridPane));
+        KeyComboActionPair commandP = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.P, KeyCombination.META_DOWN),
+                () -> setupNameRecord(gridPane));
+        KeyComboActionPair commandT = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN),
+                () -> setupTaskRecord(gridPane));
+        KeyComboActionPair commandF = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN),
+                () -> search.showFindDialog());
+        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandF);
     }
 
     private void setupUi(StackPane root, Scene scene) {
@@ -96,6 +85,7 @@ public class Memorize extends Application {
     }
 
     private void setupTaskRecord(GridPane gridPane) {
+
     }
 
     private void setupNameRecord(GridPane gridPane) {
@@ -109,15 +99,10 @@ public class Memorize extends Application {
         remember.setPromptText("The stuff you want to remember about this person.");
         gridPane.add(remember, 0, TEXT_AREA);
         // setup save actions
-        final Button mainButton = new Button();
-        mainButton.setText("Save Name Info");
-        final Runnable action = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println("Saved name");
-            }
-        };
-        setupKeyActions(action, mainButton, remember, keyWords);
+        final Button mainButton = new Button("Save Name Info");
+        final Runnable action = () -> System.out.println("Saved name");
+
+        setupSaveKeyActions(action, mainButton, KEY_CODES, KEY_COMBINATIONS, remember, keyWords);
         gridPane.add(mainButton, 0, TEXT_AREA + 1);
     }
 
@@ -131,18 +116,14 @@ public class Memorize extends Application {
         final TextArea remember = new TextArea();
         remember.setPromptText("The stuff you want to remember.");
         gridPane.add(remember, 0, TEXT_AREA);
-        final Runnable action = new Runnable() {
-            @Override
-            public void run() {
-                interactor.createGeneralNote(keyWords.getText(), remember.getText());
-                keyWords.clear();
-                remember.clear();
-                System.out.println("Saved General note");
-            }
+        final Runnable action = () -> {
+            interactor.createGeneralNote(keyWords.getText(), remember.getText());
+            keyWords.clear();
+            remember.clear();
+            System.out.println("Saved General note");
         };
-        final Button mainButton = new Button();
-        mainButton.setText("Save Info");
-        setupKeyActions(action, mainButton, remember, keyWords);
+        final Button mainButton = new Button("Save Info");
+        setupSaveKeyActions(action, mainButton, KEY_CODES, KEY_COMBINATIONS, remember, keyWords);
         gridPane.add(mainButton, 0, TEXT_AREA + 1);
     }
 

@@ -1,6 +1,7 @@
 package com.khorashadi.main;
 
 import com.khorashadi.models.GeneralRecord;
+import com.khorashadi.validation.ObjectValidator;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -11,6 +12,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Organizer {
+
+
+    private final ObjectValidator objectValidator;
+
+    public Organizer(ObjectValidator objectValidator) {
+        this.objectValidator = objectValidator;
+    }
 
     Collection<GeneralNoteWrapper> generalNotes = new LinkedList<>();
 
@@ -34,12 +42,8 @@ public class Organizer {
             return;
         }
         this.generalNotes = generalRecords.stream()
-                .map(new Function<GeneralRecord, GeneralNoteWrapper>() {
-                    @Override
-                    public GeneralNoteWrapper apply(GeneralRecord generalRecord) {
-                        return new GeneralNoteWrapper(generalRecord);
-                    }
-                })
+                .filter(objectValidator::isValidObject) // drop any invalid items
+                .map(GeneralNoteWrapper::new)
                 .collect(Collectors.toList());
     }
 

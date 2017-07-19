@@ -1,4 +1,4 @@
-package com.khorashadi.models;
+package com.khorashadi.validation;
 
 import com.uber.rave.BaseValidator;
 import com.uber.rave.Validator;

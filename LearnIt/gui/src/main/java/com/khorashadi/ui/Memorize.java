@@ -14,6 +14,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
@@ -31,7 +32,7 @@ public class Memorize extends Application {
     private static final int TEXT_AREA = KEY_WORDS + 1;
     private Stage stage;
     private Interactor interactor;
-    private Label instructions = new Label("Cmc-R for General Note, Cmd-F for Find, " +
+    private Label instructions = new Label("Cmd-R for General Note, Cmd-F for Find, " +
             "Cmd-P for Person, Cmd-N for Note, Cmd-T for Tasks");
     private Search search;
 
@@ -113,13 +114,14 @@ public class Memorize extends Application {
         keyWords.setPromptText("Key words for tagged for search");
         gridPane.add(keyWords, 0, KEY_WORDS);
 
-        final TextArea remember = new TextArea();
-        remember.setPromptText("The stuff you want to remember.");
+        final HTMLEditor remember = new HTMLEditor();
         gridPane.add(remember, 0, TEXT_AREA);
         final Runnable action = () -> {
-            interactor.createGeneralNote(keyWords.getText(), remember.getText());
+            interactor.createGeneralNote(
+                    keyWords.getText(), UiUtils.findReplaceRegexUrl(remember.getHtmlText()));
+
             keyWords.clear();
-            remember.clear();
+            remember.setHtmlText("");
             System.out.println("Saved General note");
         };
         final Button mainButton = new Button("Save Info");

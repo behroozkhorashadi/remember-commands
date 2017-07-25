@@ -48,9 +48,10 @@ public class Organizer {
     }
 
     public Collection<GeneralRecord> searchGeneralNotes(String[] terms) {
+        boolean getAll = (terms.length == 1 && terms[0].equals("*"));
         return generalNotes.stream().filter(generalNoteWrapper -> {
             for (String s : terms) {
-                if (generalNoteWrapper.hasTag(s)) {
+                if (getAll || generalNoteWrapper.hasTag(s)) {
                     return true;
                 }
             }

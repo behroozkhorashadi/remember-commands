@@ -1,5 +1,6 @@
 package com.khorashadi.main;
 
+import com.khorashadi.models.BaseRecord;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.store.MoshiFileWriter;
 import com.khorashadi.store.Serializer;
@@ -32,6 +33,10 @@ public class Interactor {
     public void createGeneralNote(String tags, String mainInfo) {
         GeneralRecord note = new GeneralRecord(tags, mainInfo);
         organizer.addGeneralNote(note);
+        writeGeneralNotesBack();
+    }
+
+    public void writeGeneralNotesBack() {
         Collection<GeneralRecord> generalRecords = organizer.getGeneralNoteCollection();
         try {
             generalNoteSerializer.writeBytes(generalRecords);
@@ -51,6 +56,11 @@ public class Interactor {
 
     private String[] processTags(String tags) {
         return tags.split(" ");
+    }
+
+    public void deleteEntry(BaseRecord lastEntry) {
+        organizer.deleteEntry(lastEntry);
+        writeGeneralNotesBack();
     }
 
     public enum SearchCategory {

@@ -1,11 +1,13 @@
 package com.khorashadi.main;
 
+import com.khorashadi.models.BaseRecord;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.validation.ObjectValidator;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Function;
@@ -67,6 +69,17 @@ public class Organizer {
                 return g1.getTimePoint().compareTo(g2.getTimePoint());
             }
         }).collect(Collectors.toList());
+    }
+
+    public void deleteEntry(BaseRecord record) {
+        Iterator<GeneralNoteWrapper> iter = generalNotes.iterator();
+        while (iter.hasNext()) {
+            BaseRecord baseRecord = iter.next().generalRecord;
+            if (baseRecord.getUuid().equals(record.getUuid())) {
+                iter.remove();
+                return;
+            }
+        }
     }
 
     private static class GeneralNoteWrapper {

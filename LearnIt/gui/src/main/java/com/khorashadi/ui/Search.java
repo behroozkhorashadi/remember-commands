@@ -17,8 +17,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.web.HTMLEditor;
-import javafx.scene.web.WebHistory;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
@@ -35,7 +33,7 @@ class Search {
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
 
-    Search(Interactor interactor) {
+    Search(final Interactor interactor) {
         searchStage.setTitle("Search");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
@@ -52,7 +50,7 @@ class Search {
         searchTerms = new TextField();
         searchTerms.setPromptText("Search");
         final Runnable action = () ->
-                displaySearch(interactor.searchData(searchCategory, searchTerms.getText()));
+                displaySearchResults(interactor.searchData(searchCategory, searchTerms.getText()));
         final Button mainButton = new Button("Start Search");
         KeyCode[] keyCodes = {KeyCode.ENTER};
         KeyCombination[] combinations = {};
@@ -61,9 +59,7 @@ class Search {
         gridPane.add(mainButton, 1, 0);
 
         webView = new WebView();
-        Button backButton =  new Button("Back to Entry");
-        backButton.setOnAction(
-                e -> webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(lastEntry)));
+        setupButtons(interactor, gridPane);
 
         list.setPrefWidth(150);
         list.setPrefHeight(70);
@@ -75,8 +71,7 @@ class Search {
                         this.lastEntry = newValue;
                     }
                 });
-        gridPane.add(webView, 1, 1);
-        gridPane.add(backButton, 1, 2);
+        gridPane.add(webView, 1, 1, 2, 1);
         setupSearchKeyboardShortcuts(scene);
     }
 
@@ -85,10 +80,29 @@ class Search {
         searchTerms.requestFocus();
         webView.getEngine().load("");
         list.getSelectionModel().clearSelection();
+        lastEntry = null;
         searchStage.show();
     }
 
-    private void displaySearch(Collection<GeneralRecord> generalRecords) {
+    private void setupButtons(Interactor interactor, GridPane gridPane) {
+        Button backButton =  new Button("Back to Entry");
+        backButton.setOnAction(
+                e -> webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(lastEntry)));
+        Button deleteButton =  new Button("Delete Entry");
+        deleteButton.setOnAction(event -> {
+            if (lastEntry == null) {
+                return;
+            }
+            interactor.deleteEntry(lastEntry);
+            displaySearchResults(interactor.searchData(searchCategory, searchTerms.getText()));
+            webView.getEngine().loadContent("");
+            lastEntry = null;
+        });
+        gridPane.add(backButton, 1, 2);
+        gridPane.add(deleteButton, 2, 2);
+    }
+
+    private void displaySearchResults(Collection<GeneralRecord> generalRecords) {
         list.setItems(FXCollections.observableArrayList(generalRecords));
     }
 

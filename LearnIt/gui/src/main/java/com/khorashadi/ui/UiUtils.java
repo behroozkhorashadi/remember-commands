@@ -2,6 +2,11 @@ package com.khorashadi.ui;
 
 import com.khorashadi.models.BaseRecord;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
@@ -54,7 +59,10 @@ public final class UiUtils {
     }
 
     static String getSaveInfoDisplayFormat(BaseRecord baseRecord) {
-        return baseRecord.getMainInfo();
+        if (baseRecord == null) {
+            return "";
+        }
+        return findReplaceUrl(baseRecord.getMainInfo());
     }
 
     static Disposable setupKeyboardShortcuts(
@@ -70,4 +78,28 @@ public final class UiUtils {
         });
     }
 
+    static String findReplaceUrl(String input) {
+        String[] split = input.split("\\s+");
+        for (String s : split) {
+            if (s.startsWith("http") || s.startsWith("www")) {
+                try {
+                    new URL(s);
+                } catch (MalformedURLException e) {
+                    continue;
+                }
+                input = input.replace(s, createHref(s));
+            }
+        }
+        return input;
+    }
+
+    private static String createHref(String url) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<a href='");
+        builder.append(url);
+        builder.append("'>");
+        builder.append(url);
+        builder.append("</a>");
+        return builder.toString();
+    }
 }

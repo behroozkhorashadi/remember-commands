@@ -11,13 +11,15 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.HTMLEditor;
+import javafx.scene.web.WebHistory;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
@@ -27,7 +29,8 @@ import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
 
 class Search {
     private final TextField searchTerms;
-    private final TextArea textArea;
+    private final WebView webView;
+    private BaseRecord lastEntry = null;
     private Interactor.SearchCategory searchCategory = GENERAL;
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
@@ -57,7 +60,10 @@ class Search {
         gridPane.add(searchTerms, 0, 0);
         gridPane.add(mainButton, 1, 0);
 
-        textArea = new TextArea();
+        webView = new WebView();
+        Button backButton =  new Button("Back to Entry");
+        backButton.setOnAction(
+                e -> webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(lastEntry)));
 
         list.setPrefWidth(150);
         list.setPrefHeight(70);
@@ -65,18 +71,19 @@ class Search {
         list.getSelectionModel().selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
                     if (newValue != null) {
-                        textArea.setText(UiUtils.getSaveInfoDisplayFormat(newValue));
+                        webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(newValue));
+                        this.lastEntry = newValue;
                     }
                 });
-        textArea.setEditable(false);
-        gridPane.add(textArea, 1, 1);
+        gridPane.add(webView, 1, 1);
+        gridPane.add(backButton, 1, 2);
         setupSearchKeyboardShortcuts(scene);
     }
 
     void showFindDialog() {
         searchTerms.clear();
         searchTerms.requestFocus();
-        textArea.clear();
+        webView.getEngine().load("");
         list.getSelectionModel().clearSelection();
         searchStage.show();
     }

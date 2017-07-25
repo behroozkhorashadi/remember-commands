@@ -110,8 +110,7 @@ public final class UiUtils {
         StringBuffer sb = new StringBuffer();
         Matcher m = pattern.matcher(input);
 
-        while (m.find())
-        {
+        while (m.find()) {
             // Avoids throwing a NullPointerException in the case that you
             // Don't have a replacement defined in the map for the match
             String repString =  createHref(m.group());

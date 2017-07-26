@@ -10,23 +10,26 @@ import java.util.UUID;
 
 @Validated(factory = RaveFactory.class)
 public abstract class BaseRecord {
-    private final String uuid = UUID.randomUUID().toString();
+    private final String uuid;
     private final List<String> userTags;
+
     private final String userTagsRaw;
 
     private final LocalDateTime timePoint;
 
     private final SaveType saveType;
-    private String mainInfo;
+
+    private final String mainInfo;
 
     public BaseRecord(String userTags, String mainInfo, SaveType saveType) {
-        this(userTags, mainInfo, saveType, LocalDateTime.now());
+        this(userTags, mainInfo, saveType, LocalDateTime.now(), UUID.randomUUID().toString());
     }
-
     public BaseRecord(String userTags,
                       String mainInfo,
                       SaveType saveType,
-                      LocalDateTime localDateTime) {
+                      LocalDateTime localDateTime,
+                      String uuid) {
+        this.uuid = uuid;
         this.userTags = new LinkedList<>();
         userTagsRaw = userTags;
         for (String s : userTags.split(" ")) {
@@ -43,6 +46,10 @@ public abstract class BaseRecord {
 
     public String getUserTagsRaw() {
         return userTagsRaw;
+    }
+
+    public SaveType getSaveType() {
+        return saveType;
     }
 
     public List<String> getUserTags() {

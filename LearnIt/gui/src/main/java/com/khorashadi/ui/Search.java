@@ -7,6 +7,8 @@ import com.khorashadi.models.BaseRecord;
 import java.util.Collection;
 
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -26,7 +28,7 @@ import static com.khorashadi.main.Interactor.SearchCategory.PEOPLE;
 import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
 
 
-class Search {
+public class Search {
     private final TextField searchTerms;
     private final WebView webView;
     private BaseRecord lastEntry = null;
@@ -35,7 +37,7 @@ class Search {
     private Stage searchStage = new Stage();
     private CheckBox searchAll = new CheckBox("Search All");
 
-    Search(final Interactor interactor) {
+    public Search(final Interactor interactor) {
         searchStage.setTitle("Search");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
@@ -77,17 +79,22 @@ class Search {
                         this.lastEntry = newValue;
                     }
                 });
-        gridPane.add(webView, 1, 1, 2, 1);
+        gridPane.add(webView, 1, 1, 3, 1);
         setupSearchKeyboardShortcuts(scene);
     }
 
-    void showFindDialog() {
-        searchTerms.clear();
+    public void showFindDialog() {
+        clearContent();
         searchTerms.requestFocus();
-        webView.getEngine().load("");
+        searchStage.show();
+    }
+
+    private void clearContent() {
+        searchTerms.clear();
+        webView.getEngine().loadContent("");
+        list.setItems(FXCollections.emptyObservableList());
         list.getSelectionModel().clearSelection();
         lastEntry = null;
-        searchStage.show();
     }
 
     private void setupButtons(Interactor interactor, GridPane gridPane) {
@@ -105,8 +112,20 @@ class Search {
             webView.getEngine().loadContent("");
             lastEntry = null;
         });
+        Button editButton = new Button("Edit Entry");
+        editButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (lastEntry != null) {
+                    interactor.editRecord(lastEntry);
+                    clearContent();
+                }
+            }
+        });
+
         gridPane.add(backButton, 1, 2);
         gridPane.add(deleteButton, 2, 2);
+        gridPane.add(editButton, 3, 2);
     }
 
     private void displaySearchResults(Collection<GeneralRecord> generalRecords) {

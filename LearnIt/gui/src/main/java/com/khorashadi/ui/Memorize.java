@@ -1,7 +1,9 @@
 package com.khorashadi.ui;
 
 import com.khorashadi.main.Interactor;
+import com.khorashadi.models.BaseRecord;
 
+import io.reactivex.disposables.CompositeDisposable;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -34,7 +36,9 @@ public class Memorize extends Application {
     private Interactor interactor;
     private Label instructions = new Label("Cmd-R for General Note, Cmd-F for Find, " +
             "Cmd-P for Person, Cmd-N for Note, Cmd-T for Tasks");
-    private Search search;
+    private CompositeDisposable currentSubscriptions = null;
+    private GridPane gridPane;
+
 
     public static void main(String[] args) {
         launch(args);
@@ -43,8 +47,7 @@ public class Memorize extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        interactor = new Interactor(getParameters());
-        search = new Search(interactor);
+        interactor = new Interactor(getParameters(), this);
         stage.setTitle("Memorize: Info");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
@@ -58,40 +61,41 @@ public class Memorize extends Application {
         System.out.println("Stop");
     }
 
-    private void setupKeyboardShortcuts(Scene scene, GridPane gridPane) {
+    private void setupKeyboardShortcuts(final Scene scene) {
         KeyComboActionPair commandR = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
-                () -> setupGeneralRecord(gridPane));
+                () -> setupGeneralRecord(null));
         KeyComboActionPair commandP = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.P, KeyCombination.META_DOWN),
-                () -> setupNameRecord(gridPane));
+                () -> setupNameRecord());
         KeyComboActionPair commandT = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN),
-                () -> setupTaskRecord(gridPane));
+                () -> setupTaskRecord());
         KeyComboActionPair commandF = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN),
-                () -> search.showFindDialog());
+                () -> interactor.showFindDialog());
+        // Intentionally don't do anything with the returned disposable
         UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandF);
     }
 
     private void setupUi(StackPane root, Scene scene) {
-        final GridPane gridPane = new GridPane();
+        this.gridPane = new GridPane();
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setVgap(5);
         gridPane.setHgap(5);
-        setupKeyboardShortcuts(scene, gridPane);
+        setupKeyboardShortcuts(scene);
         gridPane.add(instructions, 0, INSTRUCTIONS);
-        setupGeneralRecord(gridPane);
+        setupGeneralRecord(null);
         root.getChildren().add(gridPane);
     }
 
-    private void setupTaskRecord(GridPane gridPane) {
-
+    private void setupTaskRecord() {
+        reset();
     }
 
-    private void setupNameRecord(GridPane gridPane) {
+    private void setupNameRecord() {
         setStageTitle("Remember Name");
-        reset(gridPane);
+        reset();
         // maybe add a label.
         final TextField keyWords = new TextField();
         keyWords.setPromptText("Person's Name");
@@ -103,33 +107,47 @@ public class Memorize extends Application {
         final Button mainButton = new Button("Save Name Info");
         final Runnable action = () -> System.out.println("Saved name");
 
-        setupSaveKeyActions(action, mainButton, KEY_CODES, KEY_COMBINATIONS, remember, keyWords);
+        currentSubscriptions = setupSaveKeyActions(
+                action, mainButton, KEY_CODES, KEY_COMBINATIONS, remember, keyWords);
         gridPane.add(mainButton, 0, TEXT_AREA + 1);
     }
 
-    private void setupGeneralRecord(GridPane gridPane) {
+    private void setupGeneralRecord(BaseRecord currentEdit) {
         setStageTitle("General Record");
-        reset(gridPane);
-        final TextField keyWords = new TextField();
+        reset();
+        final TextField keyWords = currentEdit != null
+                ? new TextField(currentEdit.getUserTagsRaw()) : new TextField();
         keyWords.setPromptText("Key words for tagged for search");
         gridPane.add(keyWords, 0, KEY_WORDS);
 
-        final HTMLEditor remember = new HTMLEditor();
-        gridPane.add(remember, 0, TEXT_AREA);
-        final Runnable action = () -> {
-            interactor.createGeneralNote(
-                    keyWords.getText(), UiUtils.formatForSave(remember.getHtmlText()));
+        final HTMLEditor htmlEditor = new HTMLEditor();
+        if (currentEdit != null) {
+            htmlEditor.setHtmlText(currentEdit.getMainInfo());
+        }
 
+        gridPane.add(htmlEditor, 0, TEXT_AREA);
+        final Runnable action = () -> {
+            if (currentEdit != null) {
+                interactor.updateRecord(currentEdit, keyWords.getText(), htmlEditor.getHtmlText());
+            } else {
+                interactor.createGeneralNote(
+                        keyWords.getText(), UiUtils.formatForSave(htmlEditor.getHtmlText()));
+            }
             keyWords.clear();
-            remember.setHtmlText("");
+            htmlEditor.setHtmlText("");
             System.out.println("Saved General note");
         };
         final Button mainButton = new Button("Save Info");
-        setupSaveKeyActions(action, mainButton, KEY_CODES, KEY_COMBINATIONS, remember, keyWords);
+        currentSubscriptions = setupSaveKeyActions(
+                action, mainButton, KEY_CODES, KEY_COMBINATIONS, htmlEditor, keyWords);
         gridPane.add(mainButton, 0, TEXT_AREA + 1);
     }
 
-    private void reset(GridPane gridPane) {
+    private void reset() {
+        if (currentSubscriptions != null && !currentSubscriptions.isDisposed()) {
+            currentSubscriptions.dispose();
+            currentSubscriptions = null;
+        }
         gridPane.getChildren().retainAll(instructions);
     }
 
@@ -137,5 +155,17 @@ public class Memorize extends Application {
         if (stage != null) {
             stage.setTitle(stageTitle);
         }
+    }
+
+    public void editRecord(BaseRecord baseRecord) {
+        switch (baseRecord.getSaveType()) {
+            case GENERAL_RECORD:
+                setupGeneralRecord(baseRecord);
+                break;
+        }
+    }
+
+    public void setFocus() {
+        stage.requestFocus();
     }
 }

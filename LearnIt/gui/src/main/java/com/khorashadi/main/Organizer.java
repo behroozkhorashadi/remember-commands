@@ -60,17 +60,9 @@ public class Organizer {
                 }
             }
             return false;
-        }).map(new Function<GeneralNoteWrapper, GeneralRecord>() {
-            @Override
-            public GeneralRecord apply(GeneralNoteWrapper generalNoteWrapper) {
-                return generalNoteWrapper.generalRecord;
-            }
-        }).sorted(new Comparator<GeneralRecord>() {
-            @Override
-            public int compare(GeneralRecord g1, GeneralRecord g2) {
-                return g1.getTimePoint().compareTo(g2.getTimePoint());
-            }
-        }).collect(Collectors.toList());
+        }).map(generalNoteWrapper -> generalNoteWrapper.generalRecord)
+                .sorted((g1, g2) -> g1.getTimePoint()
+                        .compareTo(g2.getTimePoint())).collect(Collectors.toList());
     }
 
     public void deleteEntry(BaseRecord record) {

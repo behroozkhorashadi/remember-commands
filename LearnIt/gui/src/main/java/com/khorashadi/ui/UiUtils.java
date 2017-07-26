@@ -94,7 +94,14 @@ public final class UiUtils {
         return input;
     }
 
-    static String findReplaceRegexUrl(String input) {
+    static String formatForSave(String input) {
+        if (input.contains("contenteditable=\"true\"")){
+            input = input.replace("contenteditable=\"true\"", "contenteditable=\"false\"");
+        }
+        return findReplaceUrl(input);
+    }
+
+    private static String findReplaceRegexUrl(String input) {
         Pattern pattern = Pattern.compile(
                 "\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
                         "(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov" +

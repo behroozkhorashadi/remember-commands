@@ -118,7 +118,7 @@ public class Memorize extends Application {
         gridPane.add(remember, 0, TEXT_AREA);
         final Runnable action = () -> {
             interactor.createGeneralNote(
-                    keyWords.getText(), UiUtils.findReplaceRegexUrl(remember.getHtmlText()));
+                    keyWords.getText(), UiUtils.formatForSave(remember.getHtmlText()));
 
             keyWords.clear();
             remember.setHtmlText("");

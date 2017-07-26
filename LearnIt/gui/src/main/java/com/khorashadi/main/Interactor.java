@@ -9,6 +9,7 @@ import com.squareup.moshi.Types;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 
 import javafx.application.Application;
 
@@ -45,13 +46,16 @@ public class Interactor {
         }
     }
 
-    public Collection<GeneralRecord> searchData(SearchCategory searchCategory, String terms) {
+    public Collection<GeneralRecord> searchData(
+            SearchCategory searchCategory,
+            String terms,
+            boolean searchAll) {
         String[] termSplit = terms.split(" ");
         switch (searchCategory) {
             case GENERAL:
-                return organizer.searchGeneralNotes(termSplit);
+                return organizer.searchGeneralNotes(termSplit, searchAll);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private String[] processTags(String tags) {

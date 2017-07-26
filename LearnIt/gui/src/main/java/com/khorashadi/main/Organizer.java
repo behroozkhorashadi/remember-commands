@@ -49,11 +49,11 @@ public class Organizer {
                 .collect(Collectors.toList());
     }
 
-    public Collection<GeneralRecord> searchGeneralNotes(String[] terms) {
+    public Collection<GeneralRecord> searchGeneralNotes(String[] terms, boolean searchAll) {
         boolean getAll = (terms.length == 1 && terms[0].equals("*"));
         return generalNotes.stream().filter(generalNoteWrapper -> {
             for (String s : terms) {
-                if (getAll || generalNoteWrapper.hasTag(s)) {
+                if (getAll || generalNoteWrapper.hasTag(s) || generalNoteWrapper.checkAll(s)) {
                     return true;
                 }
             }
@@ -95,6 +95,10 @@ public class Organizer {
 
         private boolean hasTag(String s) {
             return tagSet.contains(s);
+        }
+
+        public boolean checkAll(String s) {
+            return generalRecord.getMainInfo().contains(s);
         }
     }
 }

@@ -10,6 +10,7 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -32,6 +33,7 @@ class Search {
     private Interactor.SearchCategory searchCategory = GENERAL;
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
+    private CheckBox searchAll = new CheckBox("Search All");
 
     Search(final Interactor interactor) {
         searchStage.setTitle("Search");
@@ -50,13 +52,17 @@ class Search {
         searchTerms = new TextField();
         searchTerms.setPromptText("Search");
         final Runnable action = () ->
-                displaySearchResults(interactor.searchData(searchCategory, searchTerms.getText()));
+                displaySearchResults(interactor.searchData(
+                        searchCategory, searchTerms.getText(), searchAll.isSelected()));
         final Button mainButton = new Button("Start Search");
         KeyCode[] keyCodes = {KeyCode.ENTER};
         KeyCombination[] combinations = {};
         UiUtils.setupSaveKeyActions(action, mainButton, keyCodes, combinations, searchTerms);
+
+        //Row 1
         gridPane.add(searchTerms, 0, 0);
         gridPane.add(mainButton, 1, 0);
+        gridPane.add(searchAll, 2, 0);
 
         webView = new WebView();
         setupButtons(interactor, gridPane);
@@ -94,7 +100,8 @@ class Search {
                 return;
             }
             interactor.deleteEntry(lastEntry);
-            displaySearchResults(interactor.searchData(searchCategory, searchTerms.getText()));
+            displaySearchResults(interactor.searchData(
+                    searchCategory, searchTerms.getText(), searchAll.isSelected()));
             webView.getEngine().loadContent("");
             lastEntry = null;
         });
@@ -107,6 +114,9 @@ class Search {
     }
 
     private void setupSearchKeyboardShortcuts(Scene scene) {
+        KeyComboActionPair commandA = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.A, KeyCombination.META_DOWN),
+                () -> searchAll.setSelected(!searchAll.isSelected()));
         KeyComboActionPair commandR = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
                 () -> searchCategory = GENERAL);
@@ -119,6 +129,6 @@ class Search {
         KeyComboActionPair commandW = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN),
                 () -> searchStage.hide());
-        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW);
+        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW, commandA);
     }
 }

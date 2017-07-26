@@ -10,14 +10,15 @@ import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
@@ -27,12 +28,14 @@ import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
 
 class Search {
     private final TextField searchTerms;
-    private final TextArea textArea;
+    private final WebView webView;
+    private BaseRecord lastEntry = null;
     private Interactor.SearchCategory searchCategory = GENERAL;
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
+    private CheckBox searchAll = new CheckBox("Search All");
 
-    Search(Interactor interactor) {
+    Search(final Interactor interactor) {
         searchStage.setTitle("Search");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
@@ -49,15 +52,20 @@ class Search {
         searchTerms = new TextField();
         searchTerms.setPromptText("Search");
         final Runnable action = () ->
-                displaySearch(interactor.searchData(searchCategory, searchTerms.getText()));
+                displaySearchResults(interactor.searchData(
+                        searchCategory, searchTerms.getText(), searchAll.isSelected()));
         final Button mainButton = new Button("Start Search");
         KeyCode[] keyCodes = {KeyCode.ENTER};
         KeyCombination[] combinations = {};
         UiUtils.setupSaveKeyActions(action, mainButton, keyCodes, combinations, searchTerms);
+
+        //Row 1
         gridPane.add(searchTerms, 0, 0);
         gridPane.add(mainButton, 1, 0);
+        gridPane.add(searchAll, 2, 0);
 
-        textArea = new TextArea();
+        webView = new WebView();
+        setupButtons(interactor, gridPane);
 
         list.setPrefWidth(150);
         list.setPrefHeight(70);
@@ -65,27 +73,50 @@ class Search {
         list.getSelectionModel().selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
                     if (newValue != null) {
-                        textArea.setText(UiUtils.getSaveInfoDisplayFormat(newValue));
+                        webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(newValue));
+                        this.lastEntry = newValue;
                     }
                 });
-        textArea.setEditable(false);
-        gridPane.add(textArea, 1, 1);
+        gridPane.add(webView, 1, 1, 2, 1);
         setupSearchKeyboardShortcuts(scene);
     }
 
     void showFindDialog() {
         searchTerms.clear();
         searchTerms.requestFocus();
-        textArea.clear();
+        webView.getEngine().load("");
         list.getSelectionModel().clearSelection();
+        lastEntry = null;
         searchStage.show();
     }
 
-    private void displaySearch(Collection<GeneralRecord> generalRecords) {
+    private void setupButtons(Interactor interactor, GridPane gridPane) {
+        Button backButton =  new Button("Back to Entry");
+        backButton.setOnAction(
+                e -> webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(lastEntry)));
+        Button deleteButton =  new Button("Delete Entry");
+        deleteButton.setOnAction(event -> {
+            if (lastEntry == null) {
+                return;
+            }
+            interactor.deleteEntry(lastEntry);
+            displaySearchResults(interactor.searchData(
+                    searchCategory, searchTerms.getText(), searchAll.isSelected()));
+            webView.getEngine().loadContent("");
+            lastEntry = null;
+        });
+        gridPane.add(backButton, 1, 2);
+        gridPane.add(deleteButton, 2, 2);
+    }
+
+    private void displaySearchResults(Collection<GeneralRecord> generalRecords) {
         list.setItems(FXCollections.observableArrayList(generalRecords));
     }
 
     private void setupSearchKeyboardShortcuts(Scene scene) {
+        KeyComboActionPair commandA = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.A, KeyCombination.META_DOWN),
+                () -> searchAll.setSelected(!searchAll.isSelected()));
         KeyComboActionPair commandR = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
                 () -> searchCategory = GENERAL);
@@ -98,6 +129,6 @@ class Search {
         KeyComboActionPair commandW = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN),
                 () -> searchStage.hide());
-        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW);
+        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW, commandA);
     }
 }

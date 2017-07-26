@@ -2,11 +2,17 @@ package com.khorashadi.ui;
 
 import com.khorashadi.models.BaseRecord;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -29,11 +35,11 @@ public final class UiUtils {
             final Button button,
             final KeyCode[] keyCodes,
             final KeyCombination[] keyCombinations,
-            final TextInputControl... textInputControls) {
+            final Control... textInputControls) {
         CompositeDisposable compositeDisposable = new CompositeDisposable();
         compositeDisposable.add(
                 JavaFxObservable.actionEventsOf(button).subscribe(actionEvent -> action.run()));
-        for (TextInputControl textInputControl : textInputControls) {
+        for (Control textInputControl : textInputControls) {
             compositeDisposable.add(JavaFxObservable.eventsOf(textInputControl, KEY_RELEASED)
                     .subscribe(keyEvent -> {
                         for (KeyCombination keyCombination : keyCombinations) {
@@ -54,7 +60,10 @@ public final class UiUtils {
     }
 
     static String getSaveInfoDisplayFormat(BaseRecord baseRecord) {
-        return baseRecord.getMainInfo();
+        if (baseRecord == null) {
+            return "";
+        }
+        return findReplaceUrl(baseRecord.getMainInfo());
     }
 
     static Disposable setupKeyboardShortcuts(
@@ -70,4 +79,60 @@ public final class UiUtils {
         });
     }
 
+    static String findReplaceUrl(String input) {
+        String[] split = input.split("\\s+");
+        for (String s : split) {
+            if (s.startsWith("http")) {
+                try {
+                    new URL(s);
+                } catch (MalformedURLException e) {
+                    continue;
+                }
+                input = input.replace(s, createHref(s));
+            }
+        }
+        return input;
+    }
+
+    static String formatForSave(String input) {
+        if (input.contains("contenteditable=\"true\"")){
+            input = input.replace("contenteditable=\"true\"", "contenteditable=\"false\"");
+        }
+        return findReplaceUrl(input);
+    }
+
+    private static String findReplaceRegexUrl(String input) {
+        Pattern pattern = Pattern.compile(
+                "\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
+                        "(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov" +
+                        "|mil|biz|info|mobi|name|aero|jobs|museum" +
+                        "|travel|[a-z]{2}))(:[\\d]{1,5})?" +
+                        "(((\\/([-\\w~!$+|.,=]|%[a-f\\d]{2})+)+|\\/)+|\\?|#)?" +
+                        "((\\?([-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
+                        "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)" +
+                        "(&(?:[-\\w~!$+|.,*:]|%[a-f\\d{2}])+=?" +
+                        "([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)*)*" +
+                        "(#([-\\w~!$+|.,*:=]|%[a-f\\d]{2})*)?\\b");
+
+        StringBuffer sb = new StringBuffer();
+        Matcher m = pattern.matcher(input);
+
+        while (m.find()) {
+            // Avoids throwing a NullPointerException in the case that you
+            // Don't have a replacement defined in the map for the match
+            String repString =  createHref(m.group());
+            m.appendReplacement(sb, repString);
+        }
+        m.appendTail(sb);
+        return sb.toString();
+    }
+    private static String createHref(String url) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<a href='");
+        builder.append(url);
+        builder.append("'>");
+        builder.append(url);
+        builder.append("</a>");
+        return builder.toString();
+    }
 }

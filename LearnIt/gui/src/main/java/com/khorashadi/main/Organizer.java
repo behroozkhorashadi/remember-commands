@@ -1,11 +1,13 @@
 package com.khorashadi.main;
 
+import com.khorashadi.models.BaseRecord;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.validation.ObjectValidator;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.Function;
@@ -47,11 +49,11 @@ public class Organizer {
                 .collect(Collectors.toList());
     }
 
-    public Collection<GeneralRecord> searchGeneralNotes(String[] terms) {
+    public Collection<GeneralRecord> searchGeneralNotes(String[] terms, boolean searchAll) {
         boolean getAll = (terms.length == 1 && terms[0].equals("*"));
         return generalNotes.stream().filter(generalNoteWrapper -> {
             for (String s : terms) {
-                if (getAll || generalNoteWrapper.hasTag(s)) {
+                if (getAll || generalNoteWrapper.hasTag(s) || generalNoteWrapper.checkAll(s)) {
                     return true;
                 }
             }
@@ -69,6 +71,17 @@ public class Organizer {
         }).collect(Collectors.toList());
     }
 
+    public void deleteEntry(BaseRecord record) {
+        Iterator<GeneralNoteWrapper> iter = generalNotes.iterator();
+        while (iter.hasNext()) {
+            BaseRecord baseRecord = iter.next().generalRecord;
+            if (baseRecord.getUuid().equals(record.getUuid())) {
+                iter.remove();
+                return;
+            }
+        }
+    }
+
     private static class GeneralNoteWrapper {
         private final Set<String> tagSet = new HashSet<>();
         private final GeneralRecord generalRecord;
@@ -82,6 +95,10 @@ public class Organizer {
 
         private boolean hasTag(String s) {
             return tagSet.contains(s);
+        }
+
+        public boolean checkAll(String s) {
+            return generalRecord.getMainInfo().contains(s);
         }
     }
 }

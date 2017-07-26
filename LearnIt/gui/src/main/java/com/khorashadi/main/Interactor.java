@@ -1,5 +1,6 @@
 package com.khorashadi.main;
 
+import com.khorashadi.models.BaseRecord;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.store.MoshiFileWriter;
 import com.khorashadi.store.Serializer;
@@ -8,6 +9,7 @@ import com.squareup.moshi.Types;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 
 import javafx.application.Application;
 
@@ -32,6 +34,10 @@ public class Interactor {
     public void createGeneralNote(String tags, String mainInfo) {
         GeneralRecord note = new GeneralRecord(tags, mainInfo);
         organizer.addGeneralNote(note);
+        writeGeneralNotesBack();
+    }
+
+    public void writeGeneralNotesBack() {
         Collection<GeneralRecord> generalRecords = organizer.getGeneralNoteCollection();
         try {
             generalNoteSerializer.writeBytes(generalRecords);
@@ -40,17 +46,25 @@ public class Interactor {
         }
     }
 
-    public Collection<GeneralRecord> searchData(SearchCategory searchCategory, String terms) {
+    public Collection<GeneralRecord> searchData(
+            SearchCategory searchCategory,
+            String terms,
+            boolean searchAll) {
         String[] termSplit = terms.split(" ");
         switch (searchCategory) {
             case GENERAL:
-                return organizer.searchGeneralNotes(termSplit);
+                return organizer.searchGeneralNotes(termSplit, searchAll);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private String[] processTags(String tags) {
         return tags.split(" ");
+    }
+
+    public void deleteEntry(BaseRecord lastEntry) {
+        organizer.deleteEntry(lastEntry);
+        writeGeneralNotesBack();
     }
 
     public enum SearchCategory {

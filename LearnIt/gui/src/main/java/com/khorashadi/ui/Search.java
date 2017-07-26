@@ -114,8 +114,8 @@ class Search {
     }
 
     private void setupSearchKeyboardShortcuts(Scene scene) {
-        KeyComboActionPair commandA = new KeyComboActionPair(
-                new KeyCodeCombination(KeyCode.A, KeyCombination.META_DOWN),
+        KeyComboActionPair commandF = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN),
                 () -> searchAll.setSelected(!searchAll.isSelected()));
         KeyComboActionPair commandR = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
@@ -129,6 +129,6 @@ class Search {
         KeyComboActionPair commandW = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN),
                 () -> searchStage.hide());
-        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW, commandA);
+        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW, commandF);
     }
 }

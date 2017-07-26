@@ -53,7 +53,9 @@ public class Organizer {
         boolean getAll = (terms.length == 1 && terms[0].equals("*"));
         return generalNotes.stream().filter(generalNoteWrapper -> {
             for (String s : terms) {
-                if (getAll || generalNoteWrapper.hasTag(s) || generalNoteWrapper.checkAll(s)) {
+                if (getAll || generalNoteWrapper.hasTag(s)) {
+                    return true;
+                } else if (searchAll && generalNoteWrapper.checkAll(s)) {
                     return true;
                 }
             }

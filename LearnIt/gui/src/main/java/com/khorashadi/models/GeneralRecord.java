@@ -21,7 +21,7 @@ public final class GeneralRecord extends BaseRecord {
         return getUserTagsRaw();
     }
 
-    public static GeneralRecord updateGeneralRecord(
+    public static GeneralRecord createGeneralRecord(
             BaseRecord baseRecord, String tags, String mainInfo) {
         return new GeneralRecord(tags, mainInfo, baseRecord.getTimePoint(), baseRecord.getUuid());
     }

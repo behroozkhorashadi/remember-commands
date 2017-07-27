@@ -72,7 +72,6 @@ public abstract class BaseRecord {
     public enum SaveType {
         GENERAL_RECORD,
         QUICK_NOTE,
-        PERSON,
         TASK
     }
 

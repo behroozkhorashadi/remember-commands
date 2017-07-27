@@ -63,7 +63,8 @@ public final class UiUtils {
         if (baseRecord == null) {
             return "";
         }
-        return findReplaceUrl(baseRecord.getMainInfo());
+        return baseRecord.getMainInfo();
+//        return findReplaceUrl(baseRecord.getMainInfo());
     }
 
     static Disposable setupKeyboardShortcuts(
@@ -98,12 +99,12 @@ public final class UiUtils {
         if (input.contains("contenteditable=\"true\"")){
             input = input.replace("contenteditable=\"true\"", "contenteditable=\"false\"");
         }
-        return findReplaceUrl(input);
+        return findReplaceRegexUrl(input);
     }
 
-    private static String findReplaceRegexUrl(String input) {
+    static String findReplaceRegexUrl(String input) {
         Pattern pattern = Pattern.compile(
-                "\\b(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
+                "(((ht|f)tp(s?)\\:\\/\\/|~\\/|\\/)|www.)" +
                         "(\\w+:\\w+@)?(([-\\w]+\\.)+(com|org|net|gov" +
                         "|mil|biz|info|mobi|name|aero|jobs|museum" +
                         "|travel|[a-z]{2}))(:[\\d]{1,5})?" +
@@ -126,6 +127,7 @@ public final class UiUtils {
         m.appendTail(sb);
         return sb.toString();
     }
+
     private static String createHref(String url) {
         StringBuilder builder = new StringBuilder();
         builder.append("<a href='");

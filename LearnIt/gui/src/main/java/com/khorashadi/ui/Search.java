@@ -7,8 +7,6 @@ import com.khorashadi.models.BaseRecord;
 import java.util.Collection;
 
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -31,18 +29,20 @@ import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
 public class Search {
     private final TextField searchTerms;
     private final WebView webView;
+    private final Button mainButton;
+    private final GridPane gridPane;
     private BaseRecord lastEntry = null;
     private Interactor.SearchCategory searchCategory = GENERAL;
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
     private CheckBox searchAll = new CheckBox("Search All");
 
-    public Search(final Interactor interactor) {
+    public Search() {
         searchStage.setTitle("Search");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
         searchStage.setScene(scene);
-        final GridPane gridPane = new GridPane();
+        gridPane = new GridPane();
         gridPane.setPadding(new Insets(10, 10, 10, 10));
         gridPane.setVgap(5);
         gridPane.setHgap(5);
@@ -53,13 +53,7 @@ public class Search {
         // maybe add a label.
         searchTerms = new TextField();
         searchTerms.setPromptText("Search");
-        final Runnable action = () ->
-                displaySearchResults(interactor.searchData(
-                        searchCategory, searchTerms.getText(), searchAll.isSelected()));
-        final Button mainButton = new Button("Start Search");
-        KeyCode[] keyCodes = {KeyCode.ENTER};
-        KeyCombination[] combinations = {};
-        UiUtils.setupSaveKeyActions(action, mainButton, keyCodes, combinations, searchTerms);
+        mainButton = new Button("Start Search");
 
         //Row 1
         gridPane.add(searchTerms, 0, 0);
@@ -67,7 +61,6 @@ public class Search {
         gridPane.add(searchAll, 2, 0);
 
         webView = new WebView();
-        setupButtons(interactor, gridPane);
 
         list.setPrefWidth(150);
         list.setPrefHeight(70);
@@ -81,6 +74,17 @@ public class Search {
                 });
         gridPane.add(webView, 1, 1, 3, 1);
         setupSearchKeyboardShortcuts(scene);
+    }
+
+    public void setupInteraction(final Interactor interactor) {
+        // setup main interaction buttons.
+        final Runnable action = () ->
+                displaySearchResults(interactor.searchRecords(
+                        searchCategory, searchTerms.getText(), searchAll.isSelected()));
+        KeyCode[] keyCodes = {KeyCode.ENTER};
+        KeyCombination[] combinations = {};
+        UiUtils.setupSaveKeyActions(action, mainButton, keyCodes, combinations, searchTerms);
+        setupButtons(interactor, gridPane);
     }
 
     public void showFindDialog() {
@@ -107,19 +111,16 @@ public class Search {
                 return;
             }
             interactor.deleteEntry(lastEntry);
-            displaySearchResults(interactor.searchData(
+            displaySearchResults(interactor.searchRecords(
                     searchCategory, searchTerms.getText(), searchAll.isSelected()));
             webView.getEngine().loadContent("");
             lastEntry = null;
         });
         Button editButton = new Button("Edit Entry");
-        editButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                if (lastEntry != null) {
-                    interactor.editRecord(lastEntry);
-                    clearContent();
-                }
+        editButton.setOnAction(event -> {
+            if (lastEntry != null) {
+                interactor.editRecord(lastEntry);
+                clearContent();
             }
         });
 

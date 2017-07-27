@@ -2,12 +2,11 @@ package com.khorashadi.main;
 
 import com.khorashadi.models.BaseRecord;
 import com.khorashadi.models.GeneralRecord;
-import com.khorashadi.store.MoshiFileWriter;
+import com.khorashadi.store.MoshiWriterFactory;
 import com.khorashadi.store.Serializer;
 import com.khorashadi.ui.Memorize;
 import com.khorashadi.ui.Search;
 import com.khorashadi.validation.ObjectValidatorRaveImpl;
-import com.squareup.moshi.Types;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -17,44 +16,38 @@ import javafx.application.Application;
 
 public class Interactor {
     private final Organizer organizer;
-    private final Serializer<Collection<GeneralRecord>> generalNoteSerializer;
     private final Search search;
     private final Memorize memorize;
+    private final Serializer<Collection<GeneralRecord>> generalNoteSerializer;
 
     public Interactor(Application.Parameters parameters, Memorize memorize) {
-        this(new MoshiFileWriter<>(
-                Types.newParameterizedType(Collection.class, GeneralRecord.class),
-                parameters.getRaw().get(0), "generalNotes.json"),
-                new Organizer(new ObjectValidatorRaveImpl()), memorize);
+        this(new Organizer(new ObjectValidatorRaveImpl()),
+                memorize,
+                new Search(),
+                MoshiWriterFactory.getFileWriter(GeneralRecord.class, parameters.getRaw().get(0)));
     }
 
-    Interactor(Serializer<Collection<GeneralRecord>> serializer, Organizer organizer,
-               Memorize memorize) {
-        if (serializer.fileExists()) {
-            organizer.setGeneralNotes(serializer.noExceptionRead());
+    Interactor(Organizer organizer,
+               Memorize memorize,
+               Search search,
+               Serializer<Collection<GeneralRecord>> generalNoteSerializer) {
+        if (generalNoteSerializer.fileExists()) {
+            organizer.setGeneralNotes(generalNoteSerializer.noExceptionRead());
         }
         this.memorize = memorize;
         this.organizer = organizer;
-        generalNoteSerializer = serializer;
-        search = new Search(this);
+        this.generalNoteSerializer = generalNoteSerializer;
+        this.search = search;
+        search.setupInteraction(this);
     }
 
-    public void createGeneralNote(String tags, String mainInfo) {
+    public void createGeneralRecord(String tags, String mainInfo) {
         GeneralRecord note = new GeneralRecord(tags, mainInfo);
         organizer.addGeneralNote(note);
         writeGeneralNotesBack();
     }
 
-    public void writeGeneralNotesBack() {
-        Collection<GeneralRecord> generalRecords = organizer.getGeneralNoteCollection();
-        try {
-            generalNoteSerializer.writeBytes(generalRecords);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public Collection<GeneralRecord> searchData(
+    public Collection<GeneralRecord> searchRecords(
             SearchCategory searchCategory,
             String terms,
             boolean searchAll) {
@@ -66,10 +59,6 @@ public class Interactor {
         return Collections.emptyList();
     }
 
-    private String[] processTerms(String terms) {
-        return terms.split(" ");
-    }
-
     public void deleteEntry(BaseRecord lastEntry) {
         organizer.deleteEntry(lastEntry);
         writeGeneralNotesBack();
@@ -79,20 +68,34 @@ public class Interactor {
         search.showFindDialog();
     }
 
+    public void updateRecord(BaseRecord baseRecord, String tags, String mainInfo) {
+        organizer.deleteEntry(baseRecord);
+        organizer.addGeneralNote(GeneralRecord.createGeneralRecord(baseRecord, tags, mainInfo));
+        writeGeneralNotesBack();
+    }
+
     public void editRecord(BaseRecord baseRecord) {
         memorize.editRecord(baseRecord);
         memorize.setFocus();
     }
 
-    public void updateRecord(BaseRecord baseRecord, String tags, String mainInfo) {
-        organizer.deleteEntry(baseRecord);
-        organizer.addGeneralNote(GeneralRecord.updateGeneralRecord(baseRecord, tags, mainInfo));
-        writeGeneralNotesBack();
+    private void writeGeneralNotesBack() {
+        Collection<GeneralRecord> generalRecords = organizer.getGeneralNoteCollection();
+        try {
+            generalNoteSerializer.writeBytes(generalRecords);
+        } catch (IOException e) {
+            //TODO: surface this to the users somehow.
+            e.printStackTrace();
+        }
+    }
+
+    private String[] processTerms(String terms) {
+        return terms.split(" ");
     }
 
     public enum SearchCategory {
         PEOPLE,
         GENERAL,
-        TASKS
+        TASKS;
     }
 }

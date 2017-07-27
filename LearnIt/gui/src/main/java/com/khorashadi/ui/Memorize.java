@@ -19,11 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.HTMLEditor;
 import javafx.stage.Stage;
 
-import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
-import static com.khorashadi.main.Interactor.SearchCategory.PEOPLE;
-import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
 import static com.khorashadi.ui.UiUtils.setupSaveKeyActions;
-import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 
 public class Memorize extends Application {
     private static final KeyCode[] KEY_CODES = {};
@@ -70,7 +66,7 @@ public class Memorize extends Application {
                 () -> setupNameRecord());
         KeyComboActionPair commandT = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN),
-                () -> setupTaskRecord());
+                () -> setupGeneralRecord(null));
         KeyComboActionPair commandF = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN),
                 () -> interactor.showFindDialog());
@@ -112,7 +108,7 @@ public class Memorize extends Application {
         gridPane.add(mainButton, 0, TEXT_AREA + 1);
     }
 
-    private void setupGeneralRecord(BaseRecord currentEdit) {
+    private void setupGeneralRecord(final BaseRecord currentEdit) {
         setStageTitle("General Record");
         reset();
         final TextField keyWords = currentEdit != null
@@ -130,7 +126,7 @@ public class Memorize extends Application {
             if (currentEdit != null) {
                 interactor.updateRecord(currentEdit, keyWords.getText(), htmlEditor.getHtmlText());
             } else {
-                interactor.createGeneralNote(
+                interactor.createGeneralRecord(
                         keyWords.getText(), UiUtils.formatForSave(htmlEditor.getHtmlText()));
             }
             keyWords.clear();

@@ -78,9 +78,11 @@ public class Search {
 
     public void setupInteraction(final Interactor interactor) {
         // setup main interaction buttons.
-        final Runnable action = () ->
-                displaySearchResults(interactor.searchRecords(
-                        searchCategory, searchTerms.getText(), searchAll.isSelected()));
+        final Runnable action = () -> {
+            displaySearchResults(interactor.searchRecords(
+                    searchCategory, searchTerms.getText(), searchAll.isSelected()));
+            list.requestFocus();
+        };
         KeyCode[] keyCodes = {KeyCode.ENTER};
         KeyCombination[] combinations = {};
         UiUtils.setupSaveKeyActions(action, mainButton, keyCodes, combinations, searchTerms);
@@ -137,18 +139,12 @@ public class Search {
         KeyComboActionPair commandF = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.F, KeyCombination.META_DOWN),
                 () -> searchAll.setSelected(!searchAll.isSelected()));
-        KeyComboActionPair commandR = new KeyComboActionPair(
-                new KeyCodeCombination(KeyCode.R, KeyCombination.META_DOWN),
-                () -> searchCategory = GENERAL);
-        KeyComboActionPair commandP = new KeyComboActionPair(
-                new KeyCodeCombination(KeyCode.P, KeyCombination.META_DOWN),
-                () -> searchCategory = PEOPLE);
-        KeyComboActionPair commandT = new KeyComboActionPair(
-                new KeyCodeCombination(KeyCode.T, KeyCombination.META_DOWN),
-                () -> searchCategory = TASKS);
         KeyComboActionPair commandW = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.W, KeyCombination.META_DOWN),
                 () -> searchStage.hide());
-        UiUtils.setupKeyboardShortcuts(scene, commandR, commandP, commandT, commandW, commandF);
+        KeyComboActionPair commandS = new KeyComboActionPair(
+                new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN),
+                () -> searchTerms.requestFocus());
+        UiUtils.setupKeyboardShortcuts(scene, commandW, commandF);
     }
 }

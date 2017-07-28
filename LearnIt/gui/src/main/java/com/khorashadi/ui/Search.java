@@ -91,8 +91,8 @@ public class Search {
 
     public void showFindDialog() {
         clearContent();
-        searchTerms.requestFocus();
         searchStage.show();
+        searchStage.requestFocus();
     }
 
     private void clearContent() {

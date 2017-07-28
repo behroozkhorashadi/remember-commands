@@ -1,5 +1,7 @@
 package com.khorashadi.ui;
 
+import com.khorashadi.models.GeneralRecord;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -73,6 +75,29 @@ public class UiUtilsTest {
                 "https://help.github.com/articles/changing-a-remote-s-url</a>/</li></ol>" +
                 "</body></html>";
         String result = UiUtils.formatForSave(html);
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    public void getSaveInfoDisplayFormat_whenKeyWordPresent_shouldAddHighlightMarks() {
+        String mainBody = "These are some word some of which should be highlighted or surounded " +
+                "with some mark tags in html.";
+        GeneralRecord record = new GeneralRecord("Some Tags that Don't matter", mainBody);
+        String result = UiUtils.getSaveInfoDisplayFormat(record, "some");
+        String expected = "These are <mark>some</mark> word <mark>some</mark> of which should be " +
+                "highlighted or surounded with <mark>some</mark> mark tags in html.";
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    public void getSaveInfoDisplayFormat_whenMultipleKeyWordsPresent_shouldAddHighlightMarks() {
+        String mainBody = "These are some word some of which should be highlighted or surounded " +
+                "with some mark tags in html.";
+        GeneralRecord record = new GeneralRecord("Some Tags that Don't matter", mainBody);
+        String result = UiUtils.getSaveInfoDisplayFormat(record, "some are");
+        String expected = "These <mark>are</mark> <mark>some</mark> word <mark>some</mark> of " +
+                "which should be highlighted or surounded with <mark>some</mark> mark tags in " +
+                "html.";
         assertThat(result).isEqualTo(expected);
     }
 }

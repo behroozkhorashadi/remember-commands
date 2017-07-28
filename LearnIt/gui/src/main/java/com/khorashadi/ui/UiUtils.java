@@ -30,6 +30,10 @@ public final class UiUtils {
 
     private UiUtils() { }
 
+    public static String[] processTerms(String terms) {
+        return terms.split(" ");
+    }
+
     static CompositeDisposable setupSaveKeyActions(
             final Runnable action,
             final Button button,
@@ -59,12 +63,16 @@ public final class UiUtils {
         return compositeDisposable;
     }
 
-    static String getSaveInfoDisplayFormat(BaseRecord baseRecord) {
+    static String getSaveInfoDisplayFormat(BaseRecord baseRecord, String searchTerms) {
         if (baseRecord == null) {
             return "";
         }
-        return baseRecord.getMainInfo();
-//        return findReplaceUrl(baseRecord.getMainInfo());
+        String[] split = processTerms(searchTerms);
+        String mainInfo = baseRecord.getMainInfo();
+        for (String term : split) {
+            mainInfo = mainInfo.replace(term, "<mark>" + term + "</mark>");
+        }
+        return mainInfo;
     }
 
     static Disposable setupKeyboardShortcuts(

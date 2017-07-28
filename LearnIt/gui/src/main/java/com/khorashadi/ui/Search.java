@@ -22,8 +22,6 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
-import static com.khorashadi.main.Interactor.SearchCategory.PEOPLE;
-import static com.khorashadi.main.Interactor.SearchCategory.TASKS;
 
 
 public class Search {
@@ -68,7 +66,8 @@ public class Search {
         list.getSelectionModel().selectedItemProperty()
                 .addListener((observable, oldValue, newValue) -> {
                     if (newValue != null) {
-                        webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(newValue));
+                        webView.getEngine().loadContent(
+                                UiUtils.getSaveInfoDisplayFormat(newValue, searchTerms.getText()));
                         this.lastEntry = newValue;
                     }
                 });
@@ -106,7 +105,8 @@ public class Search {
     private void setupButtons(Interactor interactor, GridPane gridPane) {
         Button backButton =  new Button("Back to Entry");
         backButton.setOnAction(
-                e -> webView.getEngine().loadContent(UiUtils.getSaveInfoDisplayFormat(lastEntry)));
+                e -> webView.getEngine().loadContent(
+                        UiUtils.getSaveInfoDisplayFormat(lastEntry, searchTerms.getText())));
         Button deleteButton =  new Button("Delete Entry");
         deleteButton.setOnAction(event -> {
             if (lastEntry == null) {
@@ -144,7 +144,7 @@ public class Search {
                 () -> searchStage.hide());
         KeyComboActionPair commandS = new KeyComboActionPair(
                 new KeyCodeCombination(KeyCode.S, KeyCombination.META_DOWN),
-                () -> searchTerms.requestFocus());
-        UiUtils.setupKeyboardShortcuts(scene, commandW, commandF);
+                searchTerms::requestFocus);
+        UiUtils.setupKeyboardShortcuts(scene, commandW, commandF, commandS);
     }
 }

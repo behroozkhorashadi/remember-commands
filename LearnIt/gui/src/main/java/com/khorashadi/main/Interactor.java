@@ -6,6 +6,7 @@ import com.khorashadi.store.MoshiWriterFactory;
 import com.khorashadi.store.Serializer;
 import com.khorashadi.ui.Memorize;
 import com.khorashadi.ui.Search;
+import com.khorashadi.ui.UiUtils;
 import com.khorashadi.validation.ObjectValidatorRaveImpl;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class Interactor {
             SearchCategory searchCategory,
             String terms,
             boolean searchAll) {
-        String[] termSplit = processTerms(terms);
+        String[] termSplit = UiUtils.processTerms(terms);
         switch (searchCategory) {
             case GENERAL:
                 return organizer.searchGeneralNotes(termSplit, searchAll);
@@ -87,10 +88,6 @@ public class Interactor {
             //TODO: surface this to the users somehow.
             e.printStackTrace();
         }
-    }
-
-    private String[] processTerms(String terms) {
-        return terms.split(" ");
     }
 
     public enum SearchCategory {

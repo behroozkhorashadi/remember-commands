@@ -2,19 +2,20 @@ package com.khorashadi.ui;
 
 import javafx.scene.input.KeyCombination;
 
-public class KeyComboActionPair {
+class KeyComboActionPair {
     private final KeyCombination keyCombination;
     private final Runnable runnable;
 
-    public KeyComboActionPair(final KeyCombination keyCombination, Runnable runnable) {
+    KeyComboActionPair(final KeyCombination keyCombination, Runnable runnable) {
         this.keyCombination = keyCombination;
         this.runnable = runnable;
     }
-    public KeyCombination getKeyCombination() {
+
+    KeyCombination getKeyCombination() {
         return keyCombination;
     }
 
-    public Runnable getRunnable() {
+    Runnable getRunnable() {
         return runnable;
     }
 }

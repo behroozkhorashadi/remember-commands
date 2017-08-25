@@ -3,6 +3,8 @@ package com.khorashadi.ui;
 import com.khorashadi.main.Interactor;
 import com.khorashadi.models.BaseRecord;
 
+import java.io.IOException;
+
 import io.reactivex.disposables.CompositeDisposable;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -30,8 +32,7 @@ public class Memorize extends Application {
     private static final int TEXT_AREA = KEY_WORDS + 1;
     private Stage stage;
     private Interactor interactor;
-    private Label instructions = new Label("Cmd-R for General Note, Cmd-F for Find, " +
-            "Cmd-P for Person, Cmd-N for Note, Cmd-T for Tasks");
+    private Label instructions = new Label("Cmd-F for Find");
     private CompositeDisposable currentSubscriptions = null;
     private GridPane gridPane;
 
@@ -43,7 +44,11 @@ public class Memorize extends Application {
     @Override
     public void start(Stage stage) {
         this.stage = stage;
-        interactor = new Interactor(getParameters(), this);
+        try {
+            interactor = new Interactor(getParameters().getRaw().get(0), this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         stage.setTitle("Memorize: Info");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
@@ -55,6 +60,18 @@ public class Memorize extends Application {
     @Override
     public void stop() {
         System.out.println("Stop");
+    }
+
+    public void editRecord(BaseRecord baseRecord) {
+        switch (baseRecord.getSaveType()) {
+            case GENERAL_RECORD:
+                setupGeneralRecord(baseRecord);
+                break;
+        }
+    }
+
+    public void setFocus() {
+        stage.requestFocus();
     }
 
     private void setupKeyboardShortcuts(final Scene scene) {
@@ -151,17 +168,5 @@ public class Memorize extends Application {
         if (stage != null) {
             stage.setTitle(stageTitle);
         }
-    }
-
-    public void editRecord(BaseRecord baseRecord) {
-        switch (baseRecord.getSaveType()) {
-            case GENERAL_RECORD:
-                setupGeneralRecord(baseRecord);
-                break;
-        }
-    }
-
-    public void setFocus() {
-        stage.requestFocus();
     }
 }

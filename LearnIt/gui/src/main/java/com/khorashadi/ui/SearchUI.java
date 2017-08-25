@@ -1,8 +1,8 @@
 package com.khorashadi.ui;
 
 import com.khorashadi.main.Interactor;
-import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.models.BaseRecord;
+import com.khorashadi.models.GeneralRecord;
 
 import java.util.Collection;
 
@@ -24,7 +24,7 @@ import javafx.stage.Stage;
 import static com.khorashadi.main.Interactor.SearchCategory.GENERAL;
 
 
-public class Search {
+public class SearchUI {
     private final TextField searchTerms;
     private final WebView webView;
     private final Button mainButton;
@@ -33,10 +33,10 @@ public class Search {
     private Interactor.SearchCategory searchCategory = GENERAL;
     private ListView<BaseRecord> list = new ListView<>();
     private Stage searchStage = new Stage();
-    private CheckBox searchAll = new CheckBox("Search All");
+    private CheckBox searchAll = new CheckBox("SearchUI All");
 
-    public Search() {
-        searchStage.setTitle("Search");
+    public SearchUI() {
+        searchStage.setTitle("SearchUI");
         StackPane root = new StackPane();
         Scene scene = new Scene(root);
         searchStage.setScene(scene);
@@ -50,8 +50,8 @@ public class Search {
 
         // maybe add a label.
         searchTerms = new TextField();
-        searchTerms.setPromptText("Search");
-        mainButton = new Button("Start Search");
+        searchTerms.setPromptText("SearchUI");
+        mainButton = new Button("Start SearchUI");
 
         //Row 1
         gridPane.add(searchTerms, 0, 0);
@@ -79,7 +79,7 @@ public class Search {
         // setup main interaction buttons.
         final Runnable action = () -> {
             displaySearchResults(interactor.searchRecords(
-                    searchCategory, searchTerms.getText(), searchAll.isSelected()));
+                    searchTerms.getText(), searchAll.isSelected()));
             list.requestFocus();
         };
         KeyCode[] keyCodes = {KeyCode.ENTER};
@@ -114,7 +114,7 @@ public class Search {
             }
             interactor.deleteEntry(lastEntry);
             displaySearchResults(interactor.searchRecords(
-                    searchCategory, searchTerms.getText(), searchAll.isSelected()));
+                    searchTerms.getText(), searchAll.isSelected()));
             webView.getEngine().loadContent("");
             lastEntry = null;
         });

@@ -54,14 +54,14 @@ public class UiUtilsTest {
 
     @Test
     public void findReplaceRegexUrl_whenInHTML_shouldReplaceWithRefTags() {
-        String html = "<html dir=\\\"ltr\\\"><head></head><body contenteditable=\\\"true\\\"><ol>"
+        String html = "<html dir=\"ltr\"><head></head><body contenteditable=\"true\"><ol>"
                 + "<li>Add key to os ssh key agent\\nhttps://help.github.com/articles/" +
                 "generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/" +
                 "#adding-your-ssh-key-to-the-ssh-agent&nbsp;\\n</li><li>Add key to github" +
                 "\\nhttps://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/ "
                 + "&nbsp;</li><li>&nbsp;Switch to using ssh repo instead of https\\n" +
                 "https://help.github.com/articles/changing-a-remote-s-url/</li></ol></body></html>";
-        String expected = "<html dir=\\\"ltr\\\"><head></head><body contenteditable=\\\"true\\\">" +
+        String expected = "<html dir=\"ltr\"><head></head><body contenteditable=\"false\">" +
                 "<ol><li>Add key to os ssh key agent\\n<a href='https://help.github.com/articles/" +
                 "generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/" +
                 "#adding-your-ssh-key-to-the-ssh-agent'>https://help.github.com/articles/" +

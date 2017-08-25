@@ -13,7 +13,15 @@ PROCCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
 FILE_STORE_NAME = 'command_storage.txt'
 COMMAND_CMP = lambda x, y: cmp(y.last_used_time(), x.last_used_time())
-
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 class CommandStore(object):
 
@@ -83,12 +91,14 @@ class CommandStore(object):
         """Load the command store from a pickle file."""
         return pickle.load(open(file_name, "rb"))
 
-    @staticmethod
-    def print_commands(commands):
-        """Pretty print the commands."""
-        for command in commands:
-            print (command.get_unique_command_id() + " --count:"
-                   + str(command.get_count_seen()))
+
+def print_commands(commands):
+    """Pretty print the commands."""
+    x = 1
+    for command in commands:
+        print (bcolors.HEADER + '(' + str(x) + '): ' + bcolors.OKGREEN + command.get_unique_command_id()
+              + bcolors.OKBLUE+ " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
+        x = x + 1
 
 
 class IgnoreRules(object):
@@ -219,7 +229,8 @@ class InteractiveCommandExecutor(object):
 
     def _enumerate_commands(self, command_results):
         for idx, command in enumerate(command_results):
-            print "(" + str(idx+1) + ") " + command.get_unique_command_id()
+            print (bcolors.HEADER + "(" + str(idx + 1) + ") " + bcolors.OKGREEN + command.get_unique_command_id()
+                   + bcolors.ENDC)
 
     def _select_command(self, command_results):
         user_input = raw_input('Choose command by # or ' +
@@ -292,9 +303,9 @@ def get_pickle_file_path(directory_path):
 def get_command_store(file_name):
     """Get the command store from the input file."""
     if os.path.isfile(file_name):
-        print 'Unpacking pickle file ' + file_name
+        print bcolors.OKBLUE + 'Unpacking pickle file ' + file_name + bcolors.ENDC
         store = CommandStore.load_command_store(file_name)
     else:
         store = CommandStore()
-        print 'File not found: ' + file_name
+        print bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC
     return store

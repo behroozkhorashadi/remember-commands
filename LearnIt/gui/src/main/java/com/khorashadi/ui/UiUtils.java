@@ -13,11 +13,9 @@ import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
-import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 
 import static javafx.scene.input.KeyEvent.KEY_RELEASED;
 

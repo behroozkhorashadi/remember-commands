@@ -3,7 +3,7 @@ package com.khorashadi.main;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.store.Serializer;
 import com.khorashadi.ui.Memorize;
-import com.khorashadi.ui.Search;
+import com.khorashadi.ui.SearchUI;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -16,7 +16,6 @@ import org.mockito.junit.MockitoRule;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -37,7 +36,7 @@ public class InteractorTest {
     @Mock
     private Serializer<Collection<GeneralRecord>> generalRecordSerializer;
     @Mock
-    private Search search;
+    private SearchUI searchUI;
     private Interactor interactor;
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -45,7 +44,7 @@ public class InteractorTest {
     private GeneralRecord generalRecord;
     @Before
     public void setUp() throws Exception {
-        interactor = new Interactor(organizer, memorize, search, generalRecordSerializer);
+        interactor = new Interactor(organizer, memorize, searchUI, generalRecordSerializer);
         generalRecord = new GeneralRecord("Sample", "Sample main");
     }
 
@@ -58,7 +57,7 @@ public class InteractorTest {
     @Test
     public void interactorConstructor_whenFileThere_shouldSetGeneralNotes() {
         when(generalRecordSerializer.fileExists()).thenReturn(true);
-        new Interactor(organizer, memorize, search, generalRecordSerializer);
+        new Interactor(organizer, memorize, searchUI, generalRecordSerializer);
         verify(organizer).setGeneralNotes(any());
         verify(generalRecordSerializer).noExceptionRead();
     }
@@ -83,10 +82,10 @@ public class InteractorTest {
         String tags = "SampleNote tags";
         Collection<GeneralRecord> expectedResult = new LinkedList<>();
         expectedResult.add(new GeneralRecord("", ""));
-        when(organizer.searchGeneralNotes(any(String[].class), anyBoolean()))
+        when(organizer.searchGeneralRecords(any(String[].class), anyBoolean()))
                 .thenReturn(expectedResult);
         Collection<GeneralRecord> result = interactor.searchRecords(GENERAL, tags, false);
-        verify(organizer).searchGeneralNotes(
+        verify(organizer).searchGeneralRecords(
                 AdditionalMatchers.aryEq(new String[] {"SampleNote", "tags"}), eq(false));
         assertThat(result).isEqualTo(expectedResult);
     }

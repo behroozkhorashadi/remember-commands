@@ -1,45 +1,50 @@
 package com.khorashadi.main;
 
+import com.khorashadi.index.IndexUtils;
+import com.khorashadi.index.RecordSearcher;
 import com.khorashadi.models.BaseRecord;
 import com.khorashadi.models.GeneralRecord;
 import com.khorashadi.store.MoshiWriterFactory;
 import com.khorashadi.store.Serializer;
 import com.khorashadi.ui.Memorize;
-import com.khorashadi.ui.Search;
-import com.khorashadi.ui.UiUtils;
+import com.khorashadi.ui.SearchUI;
 import com.khorashadi.validation.ObjectValidatorRaveImpl;
+
+import org.apache.lucene.queryparser.classic.ParseException;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
-import javafx.application.Application;
-
 public class Interactor {
     private final Organizer organizer;
-    private final Search search;
+    private final SearchUI searchUI;
     private final Memorize memorize;
     private final Serializer<Collection<GeneralRecord>> generalNoteSerializer;
 
-    public Interactor(Application.Parameters parameters, Memorize memorize) {
-        this(new Organizer(new ObjectValidatorRaveImpl()),
+    public Interactor(String baseDirectory, Memorize memorize) throws IOException {
+        this(new Organizer(new ObjectValidatorRaveImpl(), baseDirectory),
                 memorize,
-                new Search(),
-                MoshiWriterFactory.getFileWriter(GeneralRecord.class, parameters.getRaw().get(0)));
+                new SearchUI(),
+                baseDirectory,
+                MoshiWriterFactory.getFileWriter(GeneralRecord.class, baseDirectory));
     }
 
     Interactor(Organizer organizer,
                Memorize memorize,
-               Search search,
-               Serializer<Collection<GeneralRecord>> generalNoteSerializer) {
+               SearchUI searchUI,
+               String baseDirectory,
+               Serializer<Collection<GeneralRecord>> generalNoteSerializer) throws IOException {
         if (generalNoteSerializer.fileExists()) {
-            organizer.setGeneralNotes(generalNoteSerializer.noExceptionRead());
+            organizer.setGeneralNotes(generalNoteSerializer.noExceptionRead(), baseDirectory);
         }
         this.memorize = memorize;
         this.organizer = organizer;
         this.generalNoteSerializer = generalNoteSerializer;
-        this.search = search;
-        search.setupInteraction(this);
+        this.searchUI = searchUI;
+        searchUI.setupInteraction(this);
+        organizer.setRecordSearcher(
+                new RecordSearcher(IndexUtils.getIndexDirectoryFromBase(baseDirectory)));
     }
 
     public void createGeneralRecord(String tags, String mainInfo) {
@@ -48,14 +53,13 @@ public class Interactor {
         writeGeneralNotesBack();
     }
 
-    public Collection<GeneralRecord> searchRecords(
-            SearchCategory searchCategory,
-            String terms,
-            boolean searchAll) {
-        String[] termSplit = UiUtils.processTerms(terms);
-        switch (searchCategory) {
-            case GENERAL:
-                return organizer.searchGeneralNotes(termSplit, searchAll);
+    public Collection<GeneralRecord> searchRecords(String terms, boolean searchAll) {
+        try {
+            return organizer.searchGeneralRecords(terms, searchAll);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
         return Collections.emptyList();
     }
@@ -66,7 +70,7 @@ public class Interactor {
     }
 
     public void showFindDialog() {
-        search.showFindDialog();
+        searchUI.showFindDialog();
     }
 
     public void updateRecord(BaseRecord baseRecord, String tags, String mainInfo) {

@@ -58,7 +58,7 @@ def main():
     print 'Looking for all past commands with: ' + ", ".join(args.query)
     result = store.search_commands(args.query, args.startswith)
     print "Number of results found: " + str(len(result))
-    command_store_lib.CommandStore.print_commands(result)
+    command_store_lib.print_commands(result)
     if args.delete and len(result) > 0:
         print "Delete mode"
         if _delete_interaction(store, result):

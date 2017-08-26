@@ -1,3 +1,22 @@
 coverage instructions
-https://coverage.readthedocs.org/en/coverage-4.0.3/#quick-start
+https://coverage.readthedocs.io/en/coverage-4.4.1/
 
+Quick ref:
+Install coverage.py from the coverage.py page on the Python Package Index, or by using ?pip install coverage?. For a few more details, see Installation.
+Use coverage run to run your program and gather data:
+
+$ coverage run my_program.py arg1 arg2
+blah blah ..your program's output.. blah blah
+Use coverage report to report on the results:
+
+$ coverage report -m
+Name                      Stmts   Miss  Cover   Missing
+-------------------------------------------------------
+my_program.py                20      4    80%   33-35, 39
+my_other_module.py           56      6    89%   17-23
+-------------------------------------------------------
+TOTAL                        76     10    87%
+For a nicer presentation, use coverage html to get annotated HTML listings detailing missed lines:
+
+$ coverage html
+Then visit htmlcov/index.html in your browser, to see a report like this.

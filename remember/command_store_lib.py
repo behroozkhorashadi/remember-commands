@@ -7,10 +7,12 @@ import os.path
 import re
 import subprocess
 import time
+import sys
 
 
 PROCCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
+JSON_FILE_NAME = 'command_store.json'
 FILE_STORE_NAME = 'command_storage.txt'
 COMMAND_CMP = lambda x, y: cmp(y.last_used_time(), x.last_used_time())
 class bcolors:
@@ -22,6 +24,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+
 
 class CommandStore(object):
 
@@ -80,16 +83,6 @@ class CommandStore(object):
         if sort:
             matches.sort(COMMAND_CMP)
         return matches
-
-    @staticmethod
-    def pickle_command_store(command_store, file_name):
-        """Pickle the whole store."""
-        pickle.dump(command_store, open(file_name, "wb"))
-
-    @staticmethod
-    def load_command_store(file_name):
-        """Load the command store from a pickle file."""
-        return pickle.load(open(file_name, "rb"))
 
 
 def print_commands(commands):
@@ -295,17 +288,73 @@ def read_history_file(
             myfile.write(PROCCESSED_TO_TAG + "\n")
 
 
-def get_pickle_file_path(directory_path):
+def get_file_path(directory_path, use_json=False):
     """Get the pickle file given the directory where the files is."""
-    return os.path.join(directory_path, PICKLE_FILE_NAME)
+    if not use_json:
+        return os.path.join(directory_path, PICKLE_FILE_NAME)
+    return os.path.join(directory_path, JSON_FILE_NAME)
 
 
-def get_command_store(file_name):
+def _load_command_store_from_pickle(file_name):
+    """Load the command store from a pickle file."""
+    return pickle.load(open(file_name, "rb"))
+
+
+def _load_command_store_from_json(file_name):
+    """Load the command store from a pickle file."""
+    encoding = sys.getdefaultencoding()
+    try:
+        import jsonpickle
+    except ImportError:
+        print (bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
+               + bcolors.ENDC)
+        return CommandStore()
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+    with open(file_name, "rb") as in_file:
+        command_store = jsonpickle.decode(in_file.read())
+        sys.setdefaultencoding(encoding)
+        return command_store
+
+
+def _pickle_command_store(command_store, file_name):
+    """Pickle the whole store."""
+    pickle.dump(command_store, open(file_name, "wb"))
+
+
+def _jsonify_command_store(command_store, file_name):
+    """Jsonify the whole store."""
+    encoding = sys.getdefaultencoding()
+    try:
+        import jsonpickle
+    except ImportError:
+        print (bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
+               + bcolors.ENDC)
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+    with open(file_name, "wb") as out_file:
+        out_file.write(jsonpickle.encode(command_store))
+    sys.setdefaultencoding(encoding)
+
+
+def load_command_store(file_name, from_json=False):
     """Get the command store from the input file."""
+    encoding = None
+    if from_json:
+        load_store_method = _load_command_store_from_json
+    else:
+        load_store_method = _load_command_store_from_pickle
     if os.path.isfile(file_name):
-        print bcolors.OKBLUE + 'Unpacking pickle file ' + file_name + bcolors.ENDC
-        store = CommandStore.load_command_store(file_name)
+        print bcolors.OKBLUE + 'Unpacking json file ' + file_name + bcolors.ENDC
+        store = load_store_method(file_name)
     else:
         store = CommandStore()
         print bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC
     return store
+
+def save_command_store(store, filename, from_json=False):
+    if from_json:
+        save_store_method = _jsonify_command_store
+    else:
+        save_store_method = _pickle_command_store
+    save_store_method(store, filename)

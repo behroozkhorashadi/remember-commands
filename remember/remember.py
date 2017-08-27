@@ -6,6 +6,7 @@ allows you to query all the stored commands and also delete them if you choose.
 """
 import argparse
 import command_store_lib
+from interactive import InteractiveCommandExecutor
 
 
 def main():
@@ -56,8 +57,7 @@ def main():
     store_file_path = command_store_lib.get_file_path(args.save_dir, args.json)
     store = command_store_lib.load_command_store(store_file_path, args.json)
     if args.interactive:
-        command_executor = command_store_lib.InteractiveCommandExecutor(
-            store, args.history_file_path)
+        command_executor = InteractiveCommandExecutor(store, args.history_file_path)
         if not command_executor.run(args.query, args.startswith):
             print 'Exit'
         return

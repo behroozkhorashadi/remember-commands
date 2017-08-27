@@ -17,6 +17,11 @@ def main():
         help="Delete mode where you able to delete commands from the store.",
         action="store_true")
     parser.add_argument(
+        "-j",
+        "--json",
+        help="Use jsonpickle to serialize/deserialize the store.",
+        action="store_true")
+    parser.add_argument(
         "-s",
         "--startswith",
         help="Show only commands that strictly start with input command.",
@@ -24,11 +29,11 @@ def main():
     parser.add_argument(
         "-i",
         "--interactive",
-        help="Excectue the searched commands.",
+        help="Execute the searched commands.",
         action="store_true")
     parser.add_argument(
-        "pickle_dir",
-        help="The directory path. ex: ~/dir/where/picklefile/is")
+        "save_dir",
+        help="The directory path. ex: ~/dir/where/serializedfile/is")
     parser.add_argument(
         "history_file_path",
         help="The path to the history file. ex: ~/.bash_history")
@@ -37,7 +42,7 @@ def main():
         nargs='+',
         help="The term to search for. ex: 'git pull' or git")
     args = parser.parse_args()
-    if not args.pickle_dir:
+    if not args.save_dir:
         print """To many or too few args.\n$> remember.py [
                  file_store_directory_path] [history_file_path]
                  ['word|phrase to look up']"""
@@ -47,8 +52,9 @@ def main():
                  file_store_directory_path] [history_file_path]
                  ['word|phrase to look up']"""
         return
-    pickle_file_path = command_store_lib.get_pickle_file_path(args.pickle_dir)
-    store = command_store_lib.get_command_store(pickle_file_path)
+
+    store_file_path = command_store_lib.get_file_path(args.save_dir, args.json)
+    store = command_store_lib.load_command_store(store_file_path, args.json)
     if args.interactive:
         command_executor = command_store_lib.InteractiveCommandExecutor(
             store, args.history_file_path)
@@ -62,8 +68,7 @@ def main():
     if args.delete and len(result) > 0:
         print "Delete mode"
         if _delete_interaction(store, result):
-            command_store_lib.CommandStore.pickle_command_store(
-                store, pickle_file_path)
+            command_store_lib.save_command_store(store, store_file_path, args.json)
 
 
 def _delete_interaction(store, commands):

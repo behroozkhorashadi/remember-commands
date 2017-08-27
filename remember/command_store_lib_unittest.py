@@ -96,19 +96,35 @@ class TestCommandStoreLib(unittest.TestCase):
             .get_count_seen())
 
     def test_verifyPickle(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_pickle.txt")
-        command_store = command_store_lib.CommandStore()
-        command_str = "git branch"
-        command = command_store_lib.Command(command_str)
-        command_store.add_command(command)
-        command_store_lib.CommandStore.pickle_command_store(command_store, file_name)
-        command_store = command_store_lib.CommandStore.load_command_store(file_name)
-        self.assertTrue(command_store.has_command(command))
-        os.remove(file_name)
+        try:
+            file_name = os.path.join(TEST_PATH_DIR, "test_pickle.txt")
+            command_store = command_store_lib.CommandStore()
+            command_str = "git branch"
+            command = command_store_lib.Command(command_str)
+            command_store.add_command(command)
+            command_store_lib.save_command_store(command_store, file_name)
+            command_store = command_store_lib.load_command_store(file_name)
+            self.assertTrue(command_store.has_command(command))
+        finally:
+            os.remove(file_name)
+
+    def test_verifyPickle_withJson(self):
+        use_json = True
+        try:
+            file_name = os.path.join(TEST_PATH_DIR, "test_pickle.txt")
+            command_store = command_store_lib.CommandStore()
+            command_str = "git branch"
+            command = command_store_lib.Command(command_str)
+            command_store.add_command(command)
+            command_store_lib.save_command_store(command_store, file_name, use_json)
+            command_store = command_store_lib.load_command_store(file_name, use_json)
+            self.assertTrue(command_store.has_command(command))
+        finally:
+            os.remove(file_name)
 
     def test_verify_read_pickle_file(self):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.txt")
-        store = command_store_lib.get_command_store(file_name)
+        store = command_store_lib.load_command_store(file_name)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
         matches = store.search_commands(["rm"], True)
@@ -118,7 +134,7 @@ class TestCommandStoreLib(unittest.TestCase):
 
     def test_verify_read_pickle_file_time(self):
         file_name = "test_files/test_pickle.txt"
-        store = command_store_lib.get_command_store(file_name)
+        store = command_store_lib.load_command_store(file_name)
         matches = store.search_commands([""], False)
         for m in matches:
             self.assertEqual(0, m.last_used_time())
@@ -180,6 +196,16 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(1234.1234, command.last_used_time())
         command._update_time(4321)
         self.assertEqual(4321, command.last_used_time())
+
+    def test_get_file_path(self):
+        result = command_store_lib.get_file_path('my_dir/path')
+        self.assertEqual('my_dir/path/' + command_store_lib.PICKLE_FILE_NAME, result)
+        result = command_store_lib.get_file_path('my_dir/path', True)
+        self.assertEqual('my_dir/path/' + command_store_lib.JSON_FILE_NAME, result)
+
+    def test_load_file_when_file_not_there(self):
+        command_store = command_store_lib.load_command_store('randomNonExistantFile.someextension')
+        self.assertEqual(command_store.get_num_commands(), 0)
 
 if __name__ == '__main__':
     unittest.main()

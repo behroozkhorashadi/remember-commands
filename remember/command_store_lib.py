@@ -19,6 +19,7 @@ class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
+    YELLOW = '\033[33m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
@@ -85,11 +86,15 @@ class CommandStore(object):
         return matches
 
 
-def print_commands(commands):
+def print_commands(commands, highlighted_terms=[]):
     """Pretty print the commands."""
     x = 1
+    print highlighted_terms
     for command in commands:
-        print (bcolors.HEADER + '(' + str(x) + '): ' + bcolors.OKGREEN + command.get_unique_command_id()
+        command_str = command.get_unique_command_id()
+        for term in highlighted_terms:
+            command_str = command_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
+        print (bcolors.HEADER + '(' + str(x) + '): ' + bcolors.YELLOW + command_str
               + bcolors.OKBLUE+ " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
         x = x + 1
 
@@ -210,7 +215,7 @@ class Command(object):
             p = re.compile(";")
             m = p.search(currated_command)
             if m and len(currated_command) > m.start()+1:
-                currated_command = currated_command[m.start()+1:].strip()
+                currated_command = currated_command[m.start() + 1:].strip()
         return currated_command
 
 

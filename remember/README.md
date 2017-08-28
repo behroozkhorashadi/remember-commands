@@ -16,6 +16,14 @@ export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; histor
 export HISTIGNORE="ls:cd:cd:remember -:pwd:exit:date:* --help";
 ```
 
+For Zsh all you have to do is add ```setopt SHARE_HISTORY``` to your .zshrc file.
+You will probably also want to have your history HISTORYSIZE and ... set to larger than the defualt 1000. My .zshrc is as follows:
+```
+HISTFILE=~/.histfile
+HISTSIZE=50000
+SAVEHIST=50000
+```
+
 ## Saving history
 Remember works by scraping your history file and organizing the commands in that file. This is done by running *generate_store.py*.
 

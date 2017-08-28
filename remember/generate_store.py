@@ -40,5 +40,6 @@ def main():
     com_lib.save_command_store(store, store_file_path, args.json)
     print 'Writing file out to ' + store_file_path
 
+
 if __name__ == "__main__":
     main()

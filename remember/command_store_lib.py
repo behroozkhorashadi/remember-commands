@@ -89,7 +89,6 @@ class CommandStore(object):
 def print_commands(commands, highlighted_terms=[]):
     """Pretty print the commands."""
     x = 1
-    print highlighted_terms
     for command in commands:
         command_str = command.get_unique_command_id()
         for term in highlighted_terms:

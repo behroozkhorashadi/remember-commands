@@ -150,6 +150,18 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual("git foo", command_store_lib.Command.get_currated_command("    git     foo"))
         self.assertEqual(". git foo", command_store_lib.Command.get_currated_command(" .   git     foo"))
 
+    def test_CurratedZshCommands_ReturnRemovedHeaders(self):
+        self.assertEqual("setopt SHARE_HISTORY", command_store_lib.Command.get_currated_command(
+            ": 1503848943:0;setopt SHARE_HISTORY"))
+        self.assertEqual("echo $HISTFILE; other command", command_store_lib.Command.get_currated_command(
+            ": 1503848500:0;echo $HISTFILE; other command"))
+
+    def test_CurratedZshCommandsWeirdFormat_ReturnRemovedHeaders(self):
+        self.assertEqual("setopt SHARE_HISTORY", command_store_lib.Command.get_currated_command(
+            ": 1503848943:0; setopt SHARE_HISTORY"))
+        self.assertEqual(": 1503848500:0;", command_store_lib.Command.get_currated_command(
+            ": 1503848500:0; "))
+
     def test_delete_whenExists_shouldDeleteFromStore(self):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()

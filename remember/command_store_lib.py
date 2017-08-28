@@ -206,6 +206,11 @@ class Command(object):
     def get_currated_command(command_str):
         """Given a command string currate the string and return."""
         currated_command = re.sub(' +', ' ', command_str.strip())
+        if currated_command.startswith(":"):
+            p = re.compile(";")
+            m = p.search(currated_command)
+            if m and len(currated_command) > m.start()+1:
+                currated_command = currated_command[m.start()+1:].strip()
         return currated_command
 
 

@@ -308,10 +308,10 @@ def _jsonify_command_store(command_store, file_name):
     sys.setdefaultencoding(encoding)
 
 
-def load_command_store(file_name, from_json=False):
+def load_command_store(file_name, format_is_json=False):
     """Get the command store from the input file."""
     encoding = None
-    if from_json:
+    if format_is_json:
         load_store_method = _load_command_store_from_json
     else:
         load_store_method = _load_command_store_from_pickle

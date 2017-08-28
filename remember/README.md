@@ -17,7 +17,7 @@ export HISTIGNORE="ls:cd:cd:remember -:pwd:exit:date:* --help";
 ```
 
 For Zsh all you have to do is add ```setopt SHARE_HISTORY``` to your .zshrc file.
-You will probably also want to have your history HISTORYSIZE and ... set to larger than the defualt 1000. My .zshrc is as follows:
+You will probably also want to have your history HISTORYSIZE and SAVEHIST set to larger than the defualt 1000. My .zshrc is as follows:
 ```
 setopt SHARE_HISTORY
 HISTFILE=~/.histfile

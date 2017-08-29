@@ -71,7 +71,7 @@ class CommandStore(object):
         return None
 
     def search_commands(self,
-                        command_strs,
+                        search_terms,
                         starts_with=False,
                         sort=True,
                         search_info=False):
@@ -80,13 +80,16 @@ class CommandStore(object):
         for _, command in self._command_dict.iteritems():
             if starts_with:
                 if (not command.get_unique_command_id()
-                        .startswith(command_strs[0])):
+                        .startswith(search_terms[0])):
                     continue
-            if all(cmd_search in command.get_unique_command_id()
-                   for cmd_search in command_strs):
+            if all(search_term in command.get_unique_command_id()
+                   for search_term in search_terms):
                 matches.append(command)
-            if search_info and any(cmd_search in command.get_command_info()
-                                   for cmd_search in command_strs):
+                continue
+            if (search_info and
+                command.get_command_info() and
+                    any(search_term in command.get_command_info()
+                        for search_term in search_terms)):
                 matches.append(command)
         if sort:
             matches.sort(COMMAND_CMP)
@@ -103,14 +106,14 @@ def print_commands(commands, highlighted_terms=[]):
 
 def print_command(index, command, highlighted_terms=[]):
     command_str = command.get_unique_command_id()
+    info_str = command.get_command_info()
     for term in highlighted_terms:
         command_str = command_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
+        info_str = info_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
     print (bcolors.HEADER + '(' + str(index) + '): ' + bcolors.YELLOW + command_str
            + bcolors.OKBLUE + " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
-    info = command.get_command_info()
-    if info:
-        print (bcolors.FAIL + "Command context/info: " + bcolors.ENDC
-               + command.get_command_info() + bcolors.ENDC)
+    if info_str:
+        print (bcolors.FAIL + "Command context/info: " + info_str+ bcolors.ENDC)
 
 
 class IgnoreRules(object):

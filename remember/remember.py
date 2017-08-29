@@ -27,7 +27,7 @@ def main():
     store_file_path = command_store_lib.get_file_path(args.save_dir, args.json)
     store = command_store_lib.load_command_store(store_file_path, args.json)
     print 'Looking for all past commands with: ' + ", ".join(args.query)
-    result = store.search_commands(args.query, args.startswith, args.all)
+    result = store.search_commands(args.query, args.startswith, search_info=args.all)
     print "Number of results found: " + str(len(result))
     if args.execute:
         command_executor = InteractiveCommandExecutor(store, args.history_file_path)

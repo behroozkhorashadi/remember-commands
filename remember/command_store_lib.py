@@ -28,7 +28,6 @@ class bcolors:
 
 
 class CommandStore(object):
-
     """
     This is the primary class that holds and interacts with all the commands.
 
@@ -105,6 +104,7 @@ def print_commands(commands, highlighted_terms=[]):
 
 
 def print_command(index, command, highlighted_terms=[]):
+    """Pretty print a single command."""
     command_str = command.get_unique_command_id()
     info_str = command.get_command_info()
     for term in highlighted_terms:
@@ -353,8 +353,8 @@ def load_command_store(file_name, format_is_json=False):
         print bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC
     return store
 
-def save_command_store(store, filename, from_json=False):
-    if from_json:
+def save_command_store(store, filename, write_to_json=False):
+    if write_to_json:
         save_store_method = _jsonify_command_store
     else:
         save_store_method = _pickle_command_store

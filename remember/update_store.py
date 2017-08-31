@@ -15,7 +15,7 @@ def main():
     result = store.search_commands(args.query, args.startswith, )
     print "Number of results found: " + str(len(result))
     store_updated = False
-    command_executor = InteractiveCommandExecutor(store)
+    command_executor = InteractiveCommandExecutor()
     if args.delete and len(result) > 0:
         print "Delete mode"
         command_store_lib.print_commands(result, args.query)

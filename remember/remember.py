@@ -30,7 +30,7 @@ def main():
     result = store.search_commands(args.query, args.startswith, search_info=args.all)
     print "Number of results found: " + str(len(result))
     if args.execute:
-        command_executor = InteractiveCommandExecutor(store, args.history_file_path)
+        command_executor = InteractiveCommandExecutor(args.history_file_path)
         if not command_executor.run(result):
             print 'Exit'
         return

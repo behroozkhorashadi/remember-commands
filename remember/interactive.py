@@ -9,8 +9,7 @@ This module handles the command store interactive mode.
 
 
 class InteractiveCommandExecutor(object):
-    def __init__(self, command_store, history_file_path=None):
-        self._command_store = command_store
+    def __init__(self, history_file_path=None):
         self._history_file_path = history_file_path
 
     def run(self, result):
@@ -73,7 +72,6 @@ class InteractiveCommandExecutor(object):
                 store.delete_command(command.get_unique_command_id())
                 ask = False
         return changes_made
-
 
 def get_user_input(msg):
     return raw_input(msg)

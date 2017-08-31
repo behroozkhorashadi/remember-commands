@@ -97,7 +97,7 @@ class TestCommandStoreLib(unittest.TestCase):
 
     def test_verifyPickle(self):
         try:
-            file_name = os.path.join(TEST_PATH_DIR, "test_pickle.txt")
+            file_name = os.path.join(TEST_PATH_DIR, "test_pickle.pickle")
             command_store = command_store_lib.CommandStore()
             command_str = "git branch"
             command = command_store_lib.Command(command_str)
@@ -111,7 +111,7 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_verifyPickle_withJson(self):
         use_json = True
         try:
-            file_name = os.path.join(TEST_PATH_DIR, "test_pickle.txt")
+            file_name = os.path.join(TEST_PATH_DIR, "test_pickle.pickle")
             command_store = command_store_lib.CommandStore()
             command_str = "git branch"
             command = command_store_lib.Command(command_str)
@@ -123,7 +123,7 @@ class TestCommandStoreLib(unittest.TestCase):
             os.remove(file_name)
 
     def test_verify_read_pickle_file(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.txt")
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.pickle")
         store = command_store_lib.load_command_store(file_name)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
@@ -132,9 +132,26 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(matches[0].get_unique_command_id(), 'rm somefile.txt')
         self.assertEqual(matches[0].get_count_seen(), 2)
 
+    def test_verify_read_json_file(self):
+        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_json.json")
+        store = command_store_lib.load_command_store(file_name, format_is_json=True)
+        matches = store.search_commands([""], False)
+        self.assertTrue(len(matches) > 0)
+        matches = store.search_commands(["rm"], True)
+        self.assertTrue(len(matches) == 1)
+        self.assertEqual(matches[0].get_unique_command_id(), 'rm somefile.txt')
+        self.assertEqual(matches[0].get_count_seen(), 2)
+
     def test_verify_read_pickle_file_time(self):
-        file_name = "test_files/test_pickle.txt"
+        file_name = "test_files/test_pickle.pickle"
         store = command_store_lib.load_command_store(file_name)
+        matches = store.search_commands([""], False)
+        for m in matches:
+            self.assertEqual(0, m.last_used_time())
+
+    def test_verify_read_json_file_time(self):
+        file_name = "test_files/test_json.json"
+        store = command_store_lib.load_command_store(file_name, format_is_json=True)
         matches = store.search_commands([""], False)
         for m in matches:
             self.assertEqual(0, m.last_used_time())

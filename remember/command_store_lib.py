@@ -28,7 +28,6 @@ class bcolors:
 
 
 class CommandStore(object):
-
     """
     This is the primary class that holds and interacts with all the commands.
 
@@ -70,16 +69,26 @@ class CommandStore(object):
             return self._command_dict[command_str]
         return None
 
-    def search_commands(self, command_strs, starts_with=False, sort=True):
+    def search_commands(self,
+                        search_terms,
+                        starts_with=False,
+                        sort=True,
+                        search_info=False):
         """This method searches the command store for the command given."""
         matches = []
         for _, command in self._command_dict.iteritems():
             if starts_with:
                 if (not command.get_unique_command_id()
-                        .startswith(command_strs[0])):
+                        .startswith(search_terms[0])):
                     continue
-            if all(cmd_search in command.get_unique_command_id()
-                    for cmd_search in command_strs):
+            if all(search_term in command.get_unique_command_id()
+                   for search_term in search_terms):
+                matches.append(command)
+                continue
+            if (search_info and
+                command.get_command_info() and
+                    any(search_term in command.get_command_info()
+                        for search_term in search_terms)):
                 matches.append(command)
         if sort:
             matches.sort(COMMAND_CMP)
@@ -90,12 +99,21 @@ def print_commands(commands, highlighted_terms=[]):
     """Pretty print the commands."""
     x = 1
     for command in commands:
-        command_str = command.get_unique_command_id()
-        for term in highlighted_terms:
-            command_str = command_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
-        print (bcolors.HEADER + '(' + str(x) + '): ' + bcolors.YELLOW + command_str
-              + bcolors.OKBLUE+ " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
+        print_command(x, command, highlighted_terms)
         x = x + 1
+
+
+def print_command(index, command, highlighted_terms=[]):
+    """Pretty print a single command."""
+    command_str = command.get_unique_command_id()
+    info_str = command.get_command_info()
+    for term in highlighted_terms:
+        command_str = command_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
+        info_str = info_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
+    print (bcolors.HEADER + '(' + str(index) + '): ' + bcolors.YELLOW + command_str
+           + bcolors.OKBLUE + " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
+    if info_str:
+        print (bcolors.FAIL + "Command context/info: " + info_str+ bcolors.ENDC)
 
 
 class IgnoreRules(object):
@@ -161,6 +179,7 @@ class Command(object):
         self._parse_command(self._command_str)
         self._count_seen = 1
         self._last_used = last_used
+        self._command_info = ""
 
     def _parse_command(self, command):
         """Set the primary command."""
@@ -173,12 +192,20 @@ class Command(object):
             self._command_args = command_split[1:]
 
     def get_command_args(self):
-        """Get the input ars for the command"""
-        # This is for backwards compatability with earlier picked clases that
+        """Get the input args for the command"""
+        # This is for backwards compatibility with earlier picked classes that
         # didn't have this field.
         if not hasattr(self, '_command_args'):
             self._parse_command(self.get_unique_command_id())
         return self._command_args
+
+    def get_command_info(self):
+        """Get the input args for the command"""
+        # This is for backwards compatibility with earlier picked classes that
+        # didn't have this field.
+        if not hasattr(self, '_command_info'):
+            self._command_info = ""
+        return self._command_info
 
     def get_primary_command(self):
         """Get the primary command."""
@@ -205,6 +232,9 @@ class Command(object):
         if not hasattr(self, '_last_used'):
             self._last_used = 0
         return self._last_used
+
+    def set_command_info(self, info):
+        self._command_info = info
 
     @staticmethod
     def get_currated_command(command_str):
@@ -323,8 +353,8 @@ def load_command_store(file_name, format_is_json=False):
         print bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC
     return store
 
-def save_command_store(store, filename, from_json=False):
-    if from_json:
+def save_command_store(store, filename, write_to_json=False):
+    if write_to_json:
         save_store_method = _jsonify_command_store
     else:
         save_store_method = _pickle_command_store

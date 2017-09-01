@@ -58,23 +58,27 @@ class InteractiveCommandExecutor(object):
         """Delete a command from the store."""
         changes_made = False
         ask = True
-        for command in commands:
-            if ask:
-                user_input = get_user_input('Delete -->'
-                                       + command.get_unique_command_id() +
-                                       '? [y|n|exit|allofthem]')
-            else:
-                user_input = 'y'
-            if user_input == 'y':
-                print 'deleting ' + command.get_unique_command_id()
+        user_input = get_user_input('Which commands do you want '
+                                    + 'delete (ex: 1,4,9,14 or allofthem or quit)?')
+        if user_input == 'quit':
+            return False
+        if user_input == 'allofthem':
+            delete_indicies = range(1, len(commands)+1)
+        else:
+            delete_indicies = []
+            for index_str in user_input.split(','):
+                index = int(index_str.strip())
+                if index > 0 and index <= len(commands):
+                    delete_indicies.append(index)
+                else:
+                    print 'Dropping invalid entry ' + index_str
+        user_input = get_user_input('Delete ' + str(delete_indicies) + '? [y|n]')
+        if user_input == 'y':
+            for x in delete_indicies:
+                command = commands[x-1]
                 store.delete_command(command.get_unique_command_id())
+                print 'deleting ' + command.get_unique_command_id()
                 changes_made = True
-            elif user_input == 'exit':
-                return changes_made
-            elif user_input == 'allofthem':
-                print 'deleting ' + command.get_unique_command_id()
-                store.delete_command(command.get_unique_command_id())
-                ask = False
         return changes_made
 
 def get_user_input(msg):

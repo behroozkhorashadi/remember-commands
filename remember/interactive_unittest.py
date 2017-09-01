@@ -35,29 +35,29 @@ class Test(unittest.TestCase):
         store.add_command(command)
         self.assertEqual(store.get_num_commands(), 1)
         interactive = InteractiveCommandExecutor()
-        self.set_input('y')
+        self.set_input('1', 'y')
         self.assertTrue(interactive.delete_interaction(store, [command]))
         self.assertEqual(store.get_num_commands(), 0)
         self.reset_input()
 
-    def test_delete_command_from_store_should_not_delete(self):
+    def test_delete_command_from_store_when_quit_should_not_delete(self):
         store = command_store_lib.CommandStore()
         command = Command("testing delete this command")
         store.add_command(command)
         self.assertEqual(store.get_num_commands(), 1)
         interactive = InteractiveCommandExecutor()
-        self.set_input('n')
+        self.set_input('quit')
         self.assertFalse(interactive.delete_interaction(store, [command]))
         self.assertEqual(store.get_num_commands(), 1)
         self.reset_input()
 
-    def test_delete_command_from_store_random_input_should_not_delete(self):
+    def test_delete_command_from_store_when_no_should_not_delete(self):
         store = command_store_lib.CommandStore()
         command = Command("testing delete this command")
         store.add_command(command)
         self.assertEqual(store.get_num_commands(), 1)
         interactive = InteractiveCommandExecutor()
-        self.set_input('random anything')
+        self.set_input('1', 'n')
         self.assertFalse(interactive.delete_interaction(store, [command]))
         self.assertEqual(store.get_num_commands(), 1)
         self.reset_input()
@@ -68,7 +68,7 @@ class Test(unittest.TestCase):
         store.add_command(command)
         self.assertEqual(store.get_num_commands(), 1)
         interactive = InteractiveCommandExecutor()
-        self.set_input('exit')
+        self.set_input('quit')
         self.assertFalse(interactive.delete_interaction(store, [command]))
         self.assertEqual(store.get_num_commands(), 1)
         self.reset_input()
@@ -82,9 +82,51 @@ class Test(unittest.TestCase):
         store.add_command(command2)
         self.assertEqual(store.get_num_commands(), 2)
         interactive = InteractiveCommandExecutor()
-        self.set_input('allofthem')
+        self.set_input('allofthem', 'y')
         self.assertTrue(interactive.delete_interaction(store, [command, command2]))
         self.assertEqual(store.get_num_commands(), 0)
+        self.reset_input()
+
+    def test_delete_command_from_store_with_1_2_should_remove_all(self):
+        store = command_store_lib.CommandStore()
+        command = Command("testing delete this command")
+        command2 = Command("remove this also")
+        self.assertEqual(store.get_num_commands(), 0)
+        store.add_command(command)
+        store.add_command(command2)
+        self.assertEqual(store.get_num_commands(), 2)
+        interactive = InteractiveCommandExecutor()
+        self.set_input('1, 2', 'y')
+        self.assertTrue(interactive.delete_interaction(store, [command, command2]))
+        self.assertEqual(store.get_num_commands(), 0)
+        self.reset_input()
+
+    def test_delete_command_from_store_with_invalid_should_remove_1(self):
+        store = command_store_lib.CommandStore()
+        command = Command("testing delete this command")
+        command2 = Command("remove this also")
+        self.assertEqual(store.get_num_commands(), 0)
+        store.add_command(command)
+        store.add_command(command2)
+        self.assertEqual(store.get_num_commands(), 2)
+        interactive = InteractiveCommandExecutor()
+        self.set_input('1, 9', 'y')
+        self.assertTrue(interactive.delete_interaction(store, [command, command2]))
+        self.assertEqual(store.get_num_commands(), 1)
+        self.reset_input()
+
+    def test_delete_command_from_store_with_both_invalid_should_remove_0(self):
+        store = command_store_lib.CommandStore()
+        command = Command("testing delete this command")
+        command2 = Command("remove this also")
+        self.assertEqual(store.get_num_commands(), 0)
+        store.add_command(command)
+        store.add_command(command2)
+        self.assertEqual(store.get_num_commands(), 2)
+        interactive = InteractiveCommandExecutor()
+        self.set_input('8, 9')
+        self.assertFalse(interactive.delete_interaction(store, [command, command2]))
+        self.assertEqual(store.get_num_commands(), 2)
         self.reset_input()
 
     def test_run_when_command_is_executed(self):
@@ -107,7 +149,7 @@ class Test(unittest.TestCase):
 
     def set_input(self,  *args):
         self.original_raw_input = interactive.get_user_input
-        interactive.get_user_input =  InputMock(args)
+        interactive.get_user_input = InputMock(args)
 
     def reset_input(self):
         if self.original_raw_input:

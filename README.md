@@ -37,6 +37,9 @@ The second argument is where you want all the meta data from the command organiz
 
 This command should be run periodically and will scrap only the commands that haven't been seen yet. I have set it up as a cron job that just runs on my machine every couple days.
 
+On mac this is super simple. You can use the crontab command. See [this tutorial](http://www.techradar.com/how-to/computing/apple/terminal-101-creating-cron-jobs-1305651) for
+more info.
+
 ## Ignore rules
 You can add a ignore rule file to the save directory that allows the generate command to ignore certain commands. The rule file works as follows:
 

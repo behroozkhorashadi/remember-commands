@@ -9,7 +9,7 @@ python:
 env:
   global:
     # List package dependencies for conda
-    - CONDA_DEPS="pytest jsonpickle"
+    - CONDA_DEPS="pytest"
 
 before_install:
 # Here we download miniconda and install the dependencies

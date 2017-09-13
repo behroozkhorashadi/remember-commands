@@ -26,7 +26,6 @@ before_install:
 - conda install $CONDA_DEPS
 
 install:
-- python setup.py install
 - pip install coverage
 - pip install -U jsonpickle
 

@@ -28,6 +28,7 @@ before_install:
 install:
 - python setup.py install
 - pip install coverage
+- pip install -U jsonpickle
 
 script:
 - coverage run --source=. command_store_lib_unittest.py

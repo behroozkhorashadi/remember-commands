@@ -27,9 +27,11 @@ before_install:
 
 install:
 - pip install coverage
+- pip install coveralls
 - pip install -U jsonpickle
 
 script:
 - coverage run --source=. command_store_lib_unittest.py
 - coverage run --source=. -a interactive_unittest.py
+- coveralls
 

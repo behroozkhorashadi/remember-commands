@@ -1,4 +1,0 @@
-s: vim
-m: vim foo
-c: commit
-m: git foo

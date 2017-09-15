@@ -108,16 +108,8 @@ You can add a ignore rule file to the save directory that allows the generate co
 - 'm' signifies exactly matches
 - 'c' signifies contains
 
-An example is below:
-```
-s: git commit -a -m
-s: ./remember.py
-m: git log
-m: arc diff
-s: git commit -a --amend
-s: git commit --amend
-s: cd
-```
+Check out test_ignore_rule.txt file for an example
+
 
 Using Remember
 ==============

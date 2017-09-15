@@ -108,7 +108,7 @@ You can add a ignore rule file to the save directory that allows the generate co
 - 'm' signifies exactly matches
 - 'c' signifies contains
 
-Check out test_ignore_rule.txt file for an example
+Check out test_ignore_rule.txt file for an example of what the file should look like.
 
 
 Using Remember

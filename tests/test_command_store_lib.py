@@ -1,13 +1,12 @@
 #! /usr/bin/env python
-#pylint: skip-file
-
-import unittest
 
 import os
+import unittest
+
+import remember.command_store_lib as command_store_lib
 
 TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
 
-import remember.command_store_lib as command_store_lib
 
 class TestCommandStoreLib(unittest.TestCase):
 
@@ -36,7 +35,7 @@ class TestCommandStoreLib(unittest.TestCase):
         command2 = command_store_lib.Command(command_str2, 20.0)
         command_store.add_command(command2)
 
-        result =  command_store.search_commands("some", starts_with=False, sort=True)
+        result = command_store.search_commands("some", starts_with=False, sort=True)
         self.assertEquals(result[0], command2)
         self.assertEquals(result[1], command)
 
@@ -78,8 +77,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertTrue(store.has_command_by_name("whereis script"))
         self.assertTrue(store.has_command_by_name("vim /usr/bin/script"))
         self.assertFalse(store.has_command_by_name("vim somefil"))
-        self.assertEqual(2, store.get_command_by_name("rm somefile.txt")
-            .get_count_seen())
+        self.assertEqual(2, store.get_command_by_name("rm somefile.txt").get_count_seen())
 
     def test_readFile_withIgnoreFile(self):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
@@ -91,8 +89,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertTrue(store.has_command_by_name("whereis script"))
         self.assertFalse(store.has_command_by_name("vim /usr/bin/script"))
         self.assertFalse(store.has_command_by_name("vim somefil"))
-        self.assertEqual(2, store.get_command_by_name("rm somefile.txt")
-            .get_count_seen())
+        self.assertEqual(2, store.get_command_by_name("rm somefile.txt").get_count_seen())
 
     def test_verifyPickle_shouldSaveAndStore_whenCommandIsAdded(self):
         try:
@@ -251,6 +248,7 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_load_file_when_file_not_there(self):
         command_store = command_store_lib.load_command_store('randomNonExistantFile.someextension')
         self.assertEqual(command_store.get_num_commands(), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

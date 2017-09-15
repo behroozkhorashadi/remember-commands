@@ -6,14 +6,18 @@ import cPickle as pickle
 import os.path
 import re
 import time
-import sys
-
 
 PROCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
 JSON_FILE_NAME = 'command_store.json'
 FILE_STORE_NAME = 'command_storage.txt'
-COMMAND_CMP = lambda x, y: cmp(y.last_used_time(), x.last_used_time())
+
+
+def time_cmp(x, y):
+    return ((x.last_used_time() < y.last_used_time())
+            - (x.last_used_time() > y.last_used_time()))
+
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -77,20 +81,19 @@ class CommandStore(object):
         matches = []
         for _, command in self._command_dict.iteritems():
             if starts_with:
-                if (not command.get_unique_command_id()
-                        .startswith(search_terms[0])):
+                if (not command.get_unique_command_id().startswith(search_terms[0])):
                     continue
             if all(search_term in command.get_unique_command_id()
                    for search_term in search_terms):
                 matches.append(command)
                 continue
             if (search_info and
-                command.get_command_info() and
+                    command.get_command_info() and
                     any(search_term in command.get_command_info()
                         for search_term in search_terms)):
                 matches.append(command)
         if sort:
-            matches.sort(COMMAND_CMP)
+            matches.sort(time_cmp)
         return matches
 
 
@@ -109,14 +112,15 @@ def print_command(index, command, highlighted_terms=[]):
     for term in highlighted_terms:
         command_str = command_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
         info_str = info_str.replace(term, bcolors.OKGREEN + term + bcolors.YELLOW)
-    print (bcolors.HEADER + '(' + str(index) + '): ' + bcolors.YELLOW + command_str
-           + bcolors.OKBLUE + " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
+    print(bcolors.HEADER + '(' + str(index) + '): ' + bcolors.YELLOW + command_str
+          + bcolors.OKBLUE + " --count:" + str(command.get_count_seen()) + bcolors.ENDC)
     if info_str:
-        print (bcolors.FAIL + "Command context/info: " + info_str+ bcolors.ENDC)
+        print(bcolors.FAIL + "Command context/info: " + info_str + bcolors.ENDC)
 
 
 class IgnoreRules(object):
     """ This class holds the set of ignore rules for commands."""
+
     def __init__(self):
         self._start_with = []
         self._contains = []
@@ -242,7 +246,7 @@ class Command(object):
         if currated_command.startswith(":"):
             p = re.compile(";")
             m = p.search(currated_command)
-            if m and len(currated_command) > m.start()+1:
+            if m and len(currated_command) > m.start() + 1:
                 currated_command = currated_command[m.start() + 1:].strip()
         return currated_command
 
@@ -302,18 +306,14 @@ def _load_command_store_from_pickle(file_name):
 
 def _load_command_store_from_json(file_name):
     """Load the command store from a pickle file."""
-    encoding = sys.getdefaultencoding()
     try:
         import jsonpickle
     except ImportError:
-        print (bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
-               + bcolors.ENDC)
+        print(bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
+              + bcolors.ENDC)
         return CommandStore()
-    reload(sys)
-    sys.setdefaultencoding('utf8')
     with open(file_name, "rb") as in_file:
         command_store = jsonpickle.decode(in_file.read())
-        sys.setdefaultencoding(encoding)
         return command_store
 
 
@@ -324,33 +324,29 @@ def _pickle_command_store(command_store, file_name):
 
 def _jsonify_command_store(command_store, file_name):
     """Jsonify the whole store."""
-    encoding = sys.getdefaultencoding()
     try:
         import jsonpickle
     except ImportError:
-        print (bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
-               + bcolors.ENDC)
-    reload(sys)
-    sys.setdefaultencoding('utf8')
+        print(bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
+              + bcolors.ENDC)
     with open(file_name, "wb") as out_file:
-        out_file.write(jsonpickle.encode(command_store))
-    sys.setdefaultencoding(encoding)
+        out_file.write(jsonpickle.encode(command_store).encode("utf-8"))
 
 
 def load_command_store(file_name, format_is_json=False):
     """Get the command store from the input file."""
-    encoding = None
     if format_is_json:
         load_store_method = _load_command_store_from_json
     else:
         load_store_method = _load_command_store_from_pickle
     if os.path.isfile(file_name):
-        print (bcolors.OKBLUE + 'Unpacking json file ' + file_name + bcolors.ENDC)
+        print(bcolors.OKBLUE + 'Unpacking json file ' + file_name + bcolors.ENDC)
         store = load_store_method(file_name)
     else:
         store = CommandStore()
-        print (bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC)
+        print(bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC)
     return store
+
 
 def save_command_store(store, filename, write_to_json=False):
     if write_to_json:

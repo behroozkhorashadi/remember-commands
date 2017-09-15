@@ -1,19 +1,16 @@
 #! /usr/bin/env python
-#pylint: skip-file
 
 import subprocess
 import unittest
+from functools import partial
 
 import remember.command_store_lib as command_store_lib
 import remember.interactive as interactive
 from remember.command_store_lib import Command
 from remember.interactive import InteractiveCommandExecutor
 
-from functools import partial
-
 
 class Test(unittest.TestCase):
-
     def test_command_update_info_should_correctly_set_info(self):
         interactive = InteractiveCommandExecutor()
         command = Command("git rest --hard HEAD")
@@ -149,7 +146,7 @@ class Test(unittest.TestCase):
         self.reset_input()
         subprocess.call = old_call
 
-    def set_input(self,  *args):
+    def set_input(self, *args):
         self.original_raw_input = interactive.get_user_input
         interactive.get_user_input = InputMock(args)
 
@@ -161,14 +158,17 @@ class Test(unittest.TestCase):
         self.assertEqual(expected, command_str)
         self.assertTrue(shell)
 
-class InputMock( object ):
+
+class InputMock(object):
     def __init__(self, args):
         self.index = 0
         self.args = args
-    def __call__( self, input ):
-        return_value = self.args[self.index%len(self.args)]
+
+    def __call__(self, input):
+        return_value = self.args[self.index % len(self.args)]
         self.index = self.index + 1
         return return_value
+
 
 if __name__ == '__main__':
     unittest.main()

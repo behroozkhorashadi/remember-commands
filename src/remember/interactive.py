@@ -3,6 +3,7 @@ import subprocess
 import command_store_lib
 from command_store_lib import bcolors
 
+
 """
 This module handles the command store interactive mode.
 """
@@ -19,9 +20,9 @@ class InteractiveCommandExecutor(object):
 
     def _enumerate_commands(self, command_results):
         for idx, command in enumerate(command_results):
-            print (bcolors.HEADER + "(" + str(idx + 1) + ") "
-                   + bcolors.OKGREEN + command.get_unique_command_id()
-                   + bcolors.ENDC)
+            print(bcolors.HEADER + "(" + str(idx + 1) + ") "
+                  + bcolors.OKGREEN + command.get_unique_command_id()
+                  + bcolors.ENDC)
 
     def _select_command(self, command_results):
         user_input = get_user_input('Choose command by # or ' +
@@ -57,7 +58,6 @@ class InteractiveCommandExecutor(object):
     def delete_interaction(self, store, commands):
         """Delete a command from the store."""
         changes_made = False
-        ask = True
         user_input = get_user_input('Which commands do you want '
                                     + 'delete (ex: 1,4,9,14 or allofthem or quit)?')
         if user_input == 'quit':
@@ -71,18 +71,20 @@ class InteractiveCommandExecutor(object):
                 if index > 0 and index <= len(commands):
                     delete_indicies.append(index)
                 else:
-                    print ('Dropping invalid entry ' + index_str)
+                    print('Dropping invalid entry ' + index_str)
         user_input = get_user_input('Delete ' + str(delete_indicies) + '? [y|n]')
         if user_input == 'y':
             for x in delete_indicies:
                 command = commands[x-1]
                 store.delete_command(command.get_unique_command_id())
-                print ('deleting ' + command.get_unique_command_id())
+                print('deleting ' + command.get_unique_command_id())
                 changes_made = True
         return changes_made
 
+
 def get_user_input(msg):
-    return raw_input(msg)
+    return input(msg)
+
 
 def represents_int(value):
     try:

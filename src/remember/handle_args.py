@@ -18,6 +18,7 @@ def setup_args_for_update():
     add_required_terms(parser, False)
     return parser.parse_args()
 
+
 def setup_args_for_search():
     parser = argparse.ArgumentParser()
     add_json(parser)
@@ -30,6 +31,7 @@ def setup_args_for_search():
     add_required_terms(parser, True)
     return parser.parse_args()
 
+
 def setup_args_for_generate():
     parser = argparse.ArgumentParser()
     add_json(parser)
@@ -40,12 +42,14 @@ def setup_args_for_generate():
         "save_dir", help="The directory path. ex: ~/dir/where/serializedfile/is")
     return parser.parse_args()
 
+
 def add_json(parser):
     parser.add_argument(
         "-j",
         "--json",
         help="Use jsonpickle to serialize/deserialize the store.",
         action="store_true")
+
 
 def add_search(parser):
     parser.add_argument(
@@ -58,6 +62,7 @@ def add_search(parser):
         "--startswith",
         help="Show only commands that strictly start with input command.",
         action="store_true")
+
 
 def add_required_terms(parser, add_history_arg=False):
     parser.add_argument(

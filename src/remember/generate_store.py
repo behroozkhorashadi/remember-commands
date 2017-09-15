@@ -3,6 +3,7 @@
 
 import argparse
 import os.path
+
 import command_store_lib as com_lib
 
 FILE_STORE_NAME = 'command_storage.txt'
@@ -29,16 +30,16 @@ def main():
     if not os.path.isfile(ignore_rule_file):
         ignore_rule_file = None
     else:
-        print ('Using ignore rules from ' + ignore_rule_file)
+        print('Using ignore rules from ' + ignore_rule_file)
     store = com_lib.load_command_store(store_file_path, args.json)
     com_lib.read_history_file(
         store,
         args.historyfile,
         commands_file_path,
         ignore_rule_file)
-    print ('Reading ' + args.historyfile)
+    print('Reading ' + args.historyfile)
     com_lib.save_command_store(store, store_file_path, args.json)
-    print ('Writing file out to ' + store_file_path)
+    print('Writing file out to ' + store_file_path)
 
 
 if __name__ == "__main__":

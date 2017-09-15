@@ -57,7 +57,8 @@ Overview
 
 This simple python library scrapes your bash history file and generates a searchable cummulative history that is persisted, easily searchable, and runnable.
 
-## Setup
+Setup
+=====
 You're going to need to add a few things to your bash profile. These following commands make sure that all your terminals update your history file and increases the size of your history file.
 
 Add the following to your bash profile:
@@ -81,7 +82,8 @@ HISTSIZE=50000
 SAVEHIST=50000
 ```
 
-## Saving history
+Saving history
+==============
 Remember works by scraping your history file and organizing the commands in that file. This is done by running *generate_store.py*.
 
 example:
@@ -96,7 +98,8 @@ This command should be run periodically and will scrap only the commands that ha
 On mac this is super simple. You can use the crontab command. See [this tutorial](http://www.techradar.com/how-to/computing/apple/terminal-101-creating-cron-jobs-1305651) for
 more info.
 
-## Ignore rules
+Ignore rules
+============
 You can add a ignore rule file to the save directory that allows the generate command to ignore certain commands. The rule file works as follows:
 
 [s|m|c]\: text to ignore
@@ -116,7 +119,8 @@ s: git commit --amend
 s: cd
 ```
 
-## Using Remember
+Using Remember
+==============
 ./remember.py [path_to_the_save_directory] [path_to_history_file] [options] [text to search]
 
 I've aliased ./remember.py for convenience as follows:

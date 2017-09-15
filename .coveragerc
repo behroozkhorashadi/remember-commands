@@ -1,0 +1,16 @@
+[paths]
+source =
+   src/remember
+   */site-packages/remember
+
+[run]
+branch = true
+source =
+    remember
+    tests
+parallel = true
+
+[report]
+show_missing = true
+precision = 2
+omit = *migrations*

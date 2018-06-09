@@ -18,7 +18,7 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install tox
+  - pip install tox-travis
   - virtualenv --version
   - easy_install --version
   - pip --version

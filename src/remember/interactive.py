@@ -83,7 +83,7 @@ class InteractiveCommandExecutor(object):
 
 
 def get_user_input(msg):
-    return input(msg)
+    return raw_input(msg)
 
 
 def represents_int(value):

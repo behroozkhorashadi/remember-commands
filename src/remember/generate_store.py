@@ -38,8 +38,9 @@ def main():
         commands_file_path,
         ignore_rule_file)
     print('Reading ' + args.historyfile)
-    com_lib.save_command_store(store, store_file_path, args.json)
-    print('Writing file out to ' + store_file_path)
+    if com_lib.save_command_store(store, store_file_path, args.json):
+        print('Writing file out to ' + store_file_path)
+
 
 
 if __name__ == "__main__":

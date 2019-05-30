@@ -120,16 +120,16 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_verifyPickle_withJson(self):
         use_json = True
         try:
-            file_name = os.path.join(TEST_PATH_DIR, "delete_test_pickle.pickle")
+            file_path = os.path.join(TEST_PATH_DIR, "delete_test_pickle.pickle")
             command_store = command_store_lib.CommandStore()
             command_str = "git branch"
             command = command_store_lib.Command(command_str)
             command_store.add_command(command)
-            command_store_lib.save_command_store(command_store, file_name, use_json)
-            command_store = command_store_lib.load_command_store(file_name, use_json)
+            command_store_lib.save_command_store(command_store, file_path, use_json)
+            command_store = command_store_lib.load_command_store(file_path, use_json)
             self.assertTrue(command_store.has_command(command))
         finally:
-            os.remove(file_name)
+            os.remove(file_path)
 
     def test_verify_read_pickle_file(self):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.pickle")

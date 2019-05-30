@@ -5,7 +5,10 @@ This Module contains the core logic for the remember functions.
 import cPickle as pickle
 import os.path
 import re
+import shutil
 import time
+
+import sys
 
 PROCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
@@ -254,10 +257,15 @@ class Command(object):
 def get_unread_commands(src_file):
     """Read the history file and get all the unread commands."""
     unproccessed_lines = []
-    for line in reversed(open(src_file).readlines()):
-        if PROCESSED_TO_TAG in line:
-            return list(reversed(unproccessed_lines))
-        unproccessed_lines.append(line.strip())
+    tmp_hist_file = src_file + '.tmp'
+    shutil.copyfile(src_file, tmp_hist_file)
+    try:
+        for line in reversed(open(tmp_hist_file).readlines()):
+            if PROCESSED_TO_TAG in line:
+                return list(reversed(unproccessed_lines))
+            unproccessed_lines.append(line.strip())
+    finally:
+        os.remove(tmp_hist_file)
     return unproccessed_lines
 
 
@@ -320,6 +328,7 @@ def _load_command_store_from_json(file_name):
 def _pickle_command_store(command_store, file_name):
     """Pickle the whole store."""
     pickle.dump(command_store, open(file_name, "wb"))
+    return True
 
 
 def _jsonify_command_store(command_store, file_name):
@@ -329,8 +338,20 @@ def _jsonify_command_store(command_store, file_name):
     except ImportError:
         print(bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
               + bcolors.ENDC)
-    with open(file_name, "wb") as out_file:
-        out_file.write(jsonpickle.encode(command_store).encode("utf-8"))
+
+    tmp_file = file_name + '.tmp'
+    try:
+        with open(tmp_file, "wb") as out_file:
+            out_file.write(jsonpickle.encode(command_store).encode("utf-8"))
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        os.remove(tmp_file)
+        print "removing {} something went wrong".format(tmp_file)
+        return False
+    shutil.copyfile(tmp_file, file_name)
+    os.remove(tmp_file)
+    print "removing tmp file {} ".format(tmp_file)
+    return True
 
 
 def load_command_store(file_name, format_is_json=False):
@@ -353,4 +374,4 @@ def save_command_store(store, filename, write_to_json=False):
         save_store_method = _jsonify_command_store
     else:
         save_store_method = _pickle_command_store
-    save_store_method(store, filename)
+    return save_store_method(store, filename)

@@ -6,9 +6,8 @@ import cPickle as pickle
 import os.path
 import re
 import shutil
-import time
-
 import sys
+import time
 
 PROCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
@@ -343,14 +342,14 @@ def _jsonify_command_store(command_store, file_name):
     try:
         with open(tmp_file, "wb") as out_file:
             out_file.write(jsonpickle.encode(command_store).encode("utf-8"))
-    except:
+    except IOError:
         print("Unexpected error:", sys.exc_info()[0])
         os.remove(tmp_file)
-        print "removing {} something went wrong".format(tmp_file)
+        print("removing {} something went wrong".format(tmp_file))
         return False
     shutil.copyfile(tmp_file, file_name)
     os.remove(tmp_file)
-    print "removing tmp file {} ".format(tmp_file)
+    print("removing tmp file {} ".format(tmp_file))
     return True
 
 

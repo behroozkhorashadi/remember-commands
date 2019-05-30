@@ -42,6 +42,5 @@ def main():
         print('Writing file out to ' + store_file_path)
 
 
-
 if __name__ == "__main__":
     main()

@@ -11,6 +11,7 @@ install:
 
 script:
   - tox
+  - coverage run --append --source . setup.py build_ext --inplace
   - coverage run --source icon_font_to_png -m py.test
   - coverage report -m
 

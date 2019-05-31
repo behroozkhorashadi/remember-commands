@@ -1,2 +1,5 @@
 jsonpickle==0.9.6
 coverage==4.5.1
+pytest==3.4.1
+pytest-cov==2.5.1
+coveralls==1.7.0

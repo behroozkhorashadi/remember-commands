@@ -4,7 +4,7 @@ import os
 import sys
 import unittest
 
-import command_store_lib as command_store_lib
+import remember.command_store_lib as command_store_lib
 
 TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_FILES_PATH = os.path.join(TEST_PATH_DIR, "test_files")

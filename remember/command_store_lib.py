@@ -2,7 +2,11 @@
 """
 This Module contains the core logic for the remember functions.
 """
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 import os.path
 import re
 import shutil
@@ -90,9 +94,9 @@ class CommandStore(object):
                 matches.append(command)
                 continue
             if (search_info and
-                    command.get_command_info() and
-                    any(search_term in command.get_command_info()
-                        for search_term in search_terms)):
+                command.get_command_info() and
+                any(search_term in command.get_command_info()
+                    for search_term in search_terms)):
                 matches.append(command)
         if sort:
             matches.sort(time_cmp)
@@ -269,11 +273,11 @@ def get_unread_commands(src_file):
 
 
 def read_history_file(
-        store,
-        src_file,
-        store_file,
-        ignore_file=None,
-        mark_read=True):
+    store,
+    src_file,
+    store_file,
+    ignore_file=None,
+    mark_read=True):
     """Read in the history files."""
 
     commands = get_unread_commands(src_file)

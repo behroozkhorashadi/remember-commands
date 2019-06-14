@@ -4,7 +4,7 @@
 import argparse
 import os.path
 
-import command_store_lib as com_lib
+import remember.command_store_lib as com_lib
 
 FILE_STORE_NAME = 'command_storage.txt'
 IGNORE_RULE_FILE_NAME = 'ignore_rules.txt'

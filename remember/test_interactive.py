@@ -1,13 +1,17 @@
 #! /usr/bin/env python
-
+import os
 import subprocess
+import sys
 import unittest
 from functools import partial
 
-import remember.command_store_lib as command_store_lib
-import remember.interactive as interactive
-from remember.command_store_lib import Command
-from remember.interactive import InteractiveCommandExecutor
+import command_store_lib as command_store_lib
+import interactive as interactive
+from command_store_lib import Command
+from interactive import InteractiveCommandExecutor
+
+TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, TEST_PATH_DIR + '/../')
 
 
 class Test(unittest.TestCase):

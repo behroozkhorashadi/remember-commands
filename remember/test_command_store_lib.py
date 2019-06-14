@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 
 import os
+import sys
 import unittest
 
-import remember.command_store_lib as command_store_lib
+import command_store_lib as command_store_lib
 
 TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
-
+sys.path.insert(0, TEST_PATH_DIR + '/../')
 
 class TestCommandStoreLib(unittest.TestCase):
 

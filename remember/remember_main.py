@@ -4,9 +4,21 @@
 This module runs the remember portion of the command store interaction. It
 allows you to query all the stored commands and also delete them if you choose.
 """
+from __future__ import print_function
+from __future__ import absolute_import
+
+
+import os
+from future.moves import sys
+from builtins import str
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
+
+
 import remember.command_store_lib as command_store
-import handle_args
-from interactive import InteractiveCommandExecutor
+from remember import handle_args
+from remember.interactive import InteractiveCommandExecutor
 
 
 def main():

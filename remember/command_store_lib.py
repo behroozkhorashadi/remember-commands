@@ -2,8 +2,13 @@
 """
 This Module contains the core logic for the remember functions.
 """
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -24,7 +29,7 @@ def time_cmp(x, y):
             - (x.last_used_time() > y.last_used_time()))
 
 
-class bcolors:
+class bcolors(object):
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -85,7 +90,7 @@ class CommandStore(object):
                         search_info=False):
         """This method searches the command store for the command given."""
         matches = []
-        for _, command in self._command_dict.iteritems():
+        for _, command in self._command_dict.items():
             if starts_with:
                 if (not command.get_unique_command_id().startswith(search_terms[0])):
                     continue
@@ -347,7 +352,7 @@ def _jsonify_command_store(command_store, file_name):
         with open(tmp_file, "wb") as out_file:
             out_file.write(jsonpickle.encode(command_store).encode("utf-8"))
     except IOError:
-        print("Unexpected error:", sys.exc_info()[0])
+        print(("Unexpected error:", sys.exc_info()[0]))
         os.remove(tmp_file)
         print("removing {} something went wrong".format(tmp_file))
         return False

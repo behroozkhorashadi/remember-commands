@@ -1,3 +1,8 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from builtins import object
 import subprocess
 from builtins import input
 
@@ -65,7 +70,7 @@ class InteractiveCommandExecutor(object):
         if user_input == 'quit':
             return False
         if user_input == 'allofthem':
-            delete_indicies = range(1, len(commands)+1)
+            delete_indicies = list(range(1, len(commands)+1))
         else:
             delete_indicies = []
             for index_str in user_input.split(','):
@@ -85,7 +90,7 @@ class InteractiveCommandExecutor(object):
 
 
 def get_user_input(msg):
-    result = input(msg)
+    result = eval(input(msg))
     assert isinstance(result, str)
     return result
 

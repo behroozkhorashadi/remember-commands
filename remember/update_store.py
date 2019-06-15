@@ -1,8 +1,11 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
 import remember.command_store_lib as command_store
-import handle_args
-from interactive import InteractiveCommandExecutor
+from remember import handle_args
+from .interactive import InteractiveCommandExecutor
 
 
 def main(command_executor):

@@ -5,7 +5,7 @@ import handle_args
 from interactive import InteractiveCommandExecutor
 
 
-def main():
+def main(command_executor):
     """Entry point for this executable python module."""
     args = handle_args.setup_args_for_update()
     store_file_path = command_store_lib.get_file_path(args.save_dir, args.json)
@@ -14,11 +14,10 @@ def main():
     result = store.search_commands(args.query, args.startswith, )
     print("Number of results found: " + str(len(result)))
     store_updated = False
-    command_executor = InteractiveCommandExecutor()
     if args.delete and len(result) > 0:
         print("Delete mode")
         command_store_lib.print_commands(result, args.query)
-        store_updated = store_updated or command_executor.delete_interaction(store, result)
+        store_updated = command_executor.delete_interaction(store, result)
     if args.updateinfo and len(result) > 0:
         print("Updating Info mode")
         store_updated = store_updated or command_executor.set_command_info(result)
@@ -28,4 +27,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(InteractiveCommandExecutor())

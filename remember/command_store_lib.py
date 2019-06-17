@@ -105,6 +105,7 @@ def print_commands(commands, highlighted_terms=[]):
     for command in commands:
         print_command(x, command, highlighted_terms)
         x = x + 1
+    return ""
 
 
 def print_command(index, command, highlighted_terms=[]):

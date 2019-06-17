@@ -7,7 +7,7 @@ import unittest
 import command_store_lib as command_store_lib
 
 TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(0, TEST_PATH_DIR + '/../')
+TEST_FILES_PATH = os.path.join(TEST_PATH_DIR, "test_files")
 
 class TestCommandStoreLib(unittest.TestCase):
 
@@ -16,7 +16,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(0, command_store.get_num_commands())
 
     def test_search_commands(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
         matches = store.search_commands(["add"])
@@ -70,7 +70,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual("git branch", command.get_unique_command_id())
 
     def test_readFile(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
         self.assertTrue(store.has_command_by_name("vim somefile.txt"))
@@ -81,8 +81,8 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(2, store.get_command_by_name("rm somefile.txt").get_count_seen())
 
     def test_readFile_withIgnoreFile(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
-        ignore_file = os.path.join(TEST_PATH_DIR, "test_files/test_ignore_rule.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
+        ignore_file = os.path.join(TEST_FILES_PATH, "test_ignore_rule.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", ignore_file,  False)
         self.assertFalse(store.has_command_by_name("vim somefile.txt"))
@@ -133,7 +133,7 @@ class TestCommandStoreLib(unittest.TestCase):
             os.remove(file_path)
 
     def test_verify_read_pickle_file(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.pickle")
+        file_name = os.path.join(TEST_FILES_PATH, "test_pickle.pickle")
         store = command_store_lib.load_command_store(file_name)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
@@ -143,7 +143,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(matches[0].get_count_seen(), 2)
 
     def test_verify_read_json_file(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_json.json")
+        file_name = os.path.join(TEST_FILES_PATH, "test_json.json")
         store = command_store_lib.load_command_store(file_name, format_is_json=True)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
@@ -153,7 +153,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(matches[0].get_count_seen(), 2)
 
     def test_verify_read_pickle_file_time(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_pickle.pickle")
+        file_name = os.path.join(TEST_FILES_PATH, "test_pickle.pickle")
         self.assertTrue(os.path.isfile(file_name))
         store = command_store_lib.load_command_store(file_name)
         matches = store.search_commands([""], False)
@@ -161,7 +161,7 @@ class TestCommandStoreLib(unittest.TestCase):
             self.assertEqual(0, m.last_used_time())
 
     def test_verify_read_json_file_time(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_json.json")
+        file_name = os.path.join(TEST_FILES_PATH, "test_json.json")
         self.assertTrue(os.path.isfile(file_name))
         store = command_store_lib.load_command_store(file_name, format_is_json=True)
         matches = store.search_commands([""], False)
@@ -170,7 +170,7 @@ class TestCommandStoreLib(unittest.TestCase):
             self.assertEqual(0, m.last_used_time())
 
     def test_readUnproccessedLinesOnly(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_processed.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_processed.txt")
         unread_commands = command_store_lib.get_unread_commands(file_name)
         self.assertEqual("vim somefile.txt", unread_commands[0])
         self.assertEqual("git commit -a -m \"renamed directory.\"", unread_commands[1])
@@ -193,7 +193,7 @@ class TestCommandStoreLib(unittest.TestCase):
             ": 1503848500:0; "))
 
     def test_delete_whenExists_shouldDeleteFromStore(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
         self.assertTrue(os.path.isfile(file_name))
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
@@ -206,7 +206,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertIsNone(store.delete_command('anything'))
 
     def test_ignoreRule_whenCreate_shouldCreateWorkingIgnoreRule(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_ignore_rule.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_ignore_rule.txt")
         ignore_rule = command_store_lib.IgnoreRules.create_ignore_rule(
             file_name)
         self.assertTrue(ignore_rule.is_match('vim opensomefile'))
@@ -218,7 +218,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertFalse(ignore_rule.is_match('git foos'))
 
     def test_ignoreRule_whenFileDoestExist_shouldNotCrash(self):
-        file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
         store = command_store_lib.CommandStore()
         command_store_lib.read_history_file(
             store, file_name, "doesntmatter", "test_files/fileNotthere.txt",

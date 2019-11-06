@@ -24,9 +24,8 @@ JSON_FILE_NAME = 'command_store.json'
 FILE_STORE_NAME = 'command_storage.txt'
 
 
-def time_cmp(x, y):
-    return ((x.last_used_time() < y.last_used_time())
-            - (x.last_used_time() > y.last_used_time()))
+def time_cmp(item):
+    return item.last_used_time()
 
 
 class bcolors(object):
@@ -104,7 +103,7 @@ class CommandStore(object):
                     for search_term in search_terms)):
                 matches.append(command)
         if sort:
-            matches.sort(time_cmp)
+            matches.sort(key=time_cmp, reverse=True)
         return matches
 
 

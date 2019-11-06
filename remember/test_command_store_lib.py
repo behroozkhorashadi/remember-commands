@@ -10,6 +10,7 @@ import remember.command_store_lib as command_store_lib
 TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, TEST_PATH_DIR + '/../')
 
+
 class TestCommandStoreLib(unittest.TestCase):
 
     def test_CommandStore_isEmpty(self):
@@ -19,7 +20,7 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_search_commands(self):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()
-        command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
         matches = store.search_commands(["add"])
         self.assertIsNotNone(matches)
         matches = store.search_commands(["add"], True)
@@ -38,8 +39,8 @@ class TestCommandStoreLib(unittest.TestCase):
         command_store.add_command(command2)
 
         result = command_store.search_commands("some", starts_with=False, sort=True)
-        self.assertEquals(result[0], command2)
-        self.assertEquals(result[1], command)
+        self.assertEqual(result[0], command2)
+        self.assertEqual(result[1], command)
 
     def test_addCommandToStore(self):
         command_store = command_store_lib.CommandStore()
@@ -73,7 +74,7 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_readFile(self):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         store = command_store_lib.CommandStore()
-        command_store_lib.read_history_file(store, file_name, "doesntmatter", None,  False)
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
         self.assertTrue(store.has_command_by_name("vim somefile.txt"))
         self.assertTrue(store.has_command_by_name("rm somefile.txt"))
         self.assertTrue(store.has_command_by_name("whereis script"))
@@ -85,7 +86,7 @@ class TestCommandStoreLib(unittest.TestCase):
         file_name = os.path.join(TEST_PATH_DIR, "test_files/test_input.txt")
         ignore_file = os.path.join(TEST_PATH_DIR, "test_files/test_ignore_rule.txt")
         store = command_store_lib.CommandStore()
-        command_store_lib.read_history_file(store, file_name, "doesntmatter", ignore_file,  False)
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", ignore_file, False)
         self.assertFalse(store.has_command_by_name("vim somefile.txt"))
         self.assertTrue(store.has_command_by_name("rm somefile.txt"))
         self.assertTrue(store.has_command_by_name("whereis script"))
@@ -178,14 +179,17 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(2, len(unread_commands))
 
     def test_CurratedCommands_ReturnCorrectResults(self):
-        self.assertEqual("git foo", command_store_lib.Command.get_currated_command("    git     foo"))
-        self.assertEqual(". git foo", command_store_lib.Command.get_currated_command(" .   git     foo"))
+        self.assertEqual("git foo",
+                         command_store_lib.Command.get_currated_command("    git     foo"))
+        self.assertEqual(". git foo",
+                         command_store_lib.Command.get_currated_command(" .   git     foo"))
 
     def test_CurratedZshCommands_ReturnRemovedHeaders(self):
         self.assertEqual("setopt SHARE_HISTORY", command_store_lib.Command.get_currated_command(
             ": 1503848943:0;setopt SHARE_HISTORY"))
-        self.assertEqual("echo $HISTFILE; other command", command_store_lib.Command.get_currated_command(
-            ": 1503848500:0;echo $HISTFILE; other command"))
+        self.assertEqual("echo $HISTFILE; other command",
+                         command_store_lib.Command.get_currated_command(
+                             ": 1503848500:0;echo $HISTFILE; other command"))
 
     def test_CurratedZshCommandsWeirdFormat_ReturnRemovedHeaders(self):
         self.assertEqual("setopt SHARE_HISTORY", command_store_lib.Command.get_currated_command(
@@ -229,7 +233,8 @@ class TestCommandStoreLib(unittest.TestCase):
         command_str = 'git diff HEAD^ src/b/FragmentOnlyDetector.java'
         command = command_store_lib.Command(command_str, 1234.1234)
         self.assertEqual(command.get_primary_command(), 'git')
-        self.assertEqual(command.get_command_args(), ['diff', 'HEAD^', 'src/b/FragmentOnlyDetector.java'])
+        self.assertEqual(command.get_command_args(),
+                         ['diff', 'HEAD^', 'src/b/FragmentOnlyDetector.java'])
         self.assertEqual(1234.1234, command.last_used_time())
         command_str = 'git'
         command = command_store_lib.Command(command_str, 1234.1234)

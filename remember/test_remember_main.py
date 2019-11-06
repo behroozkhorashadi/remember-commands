@@ -1,4 +1,3 @@
-import StringIO
 import argparse
 from unittest import TestCase
 from remember import remember_main

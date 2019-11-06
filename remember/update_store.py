@@ -2,10 +2,17 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+
+import os
 from builtins import str
+
+from future.moves import sys
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
 import remember.command_store_lib as command_store
 from remember import handle_args
-from .interactive import InteractiveCommandExecutor
+from remember.interactive import InteractiveCommandExecutor
 
 
 def main():

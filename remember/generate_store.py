@@ -6,6 +6,10 @@ from __future__ import absolute_import
 import argparse
 import os.path
 
+from future.moves import sys
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
 import remember.command_store_lib as com_lib
 
 IGNORE_RULE_FILE_NAME = 'ignore_rules.txt'

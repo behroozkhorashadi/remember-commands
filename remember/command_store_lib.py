@@ -268,7 +268,11 @@ def get_unread_commands(src_file):
     tmp_hist_file = src_file + '.tmp'
     shutil.copyfile(src_file, tmp_hist_file)
     try:
-        for line in reversed(open(tmp_hist_file).readlines()):
+        for line in reversed(open(tmp_hist_file, 'rb').readlines()):
+            try:
+                line = line.decode("utf-8")
+            except UnicodeDecodeError as e:
+                continue
             if PROCESSED_TO_TAG in line:
                 return list(reversed(unproccessed_lines))
             unproccessed_lines.append(line.strip())

@@ -4,9 +4,19 @@
 This module runs the remember portion of the command store interaction. It
 allows you to query all the stored commands and also delete them if you choose.
 """
-from remember import command_store_lib
-import handle_args
-from interactive import InteractiveCommandExecutor
+from __future__ import print_function
+from __future__ import absolute_import
+
+import os
+from future.moves import sys
+from builtins import str
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
+
+import remember.command_store_lib as command_store
+from remember import handle_args
+from remember.interactive import InteractiveCommandExecutor
 
 
 def main():
@@ -25,8 +35,8 @@ def main():
 
 
 def run_remember_command(save_dir, use_json, history_file_path, query, search_all, search_starts_with, execute):
-    store_file_path = command_store_lib.get_file_path(save_dir, use_json)
-    store = command_store_lib.load_command_store(store_file_path, use_json)
+    store_file_path = command_store.get_file_path(save_dir, use_json)
+    store = command_store.load_command_store(store_file_path, use_json)
     print('Looking for all past commands with: ' + ", ".join(query))
     result = store.search_commands(query, search_starts_with, search_info=search_all)
     print("Number of results found: " + str(len(result)))
@@ -34,8 +44,8 @@ def run_remember_command(save_dir, use_json, history_file_path, query, search_al
         command_executor = InteractiveCommandExecutor(history_file_path)
         if not command_executor.run(result):
             return 'Exit'
-    return command_store_lib.print_commands(result, query)
+    return command_store.print_commands(result, query)
 
 
 if __name__ == "__main__":
-    print(main())
+    main()

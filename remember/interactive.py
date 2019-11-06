@@ -1,7 +1,14 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from builtins import object
 import subprocess
+from builtins import input
 
-import command_store_lib
-from command_store_lib import bcolors
+
+import remember.command_store_lib as command_store
+from remember.command_store_lib import bcolors
 
 
 """
@@ -50,7 +57,7 @@ class InteractiveCommandExecutor(object):
             user_input = get_user_input('What would you like to add '
                                         'as searchable info for this command:\n')
             command.set_command_info(user_input)
-            command_store_lib.print_command(1, command)
+            command_store.print_command(1, command)
             return True
         else:
             return False
@@ -63,7 +70,7 @@ class InteractiveCommandExecutor(object):
         if user_input == 'quit':
             return False
         if user_input == 'allofthem':
-            delete_indicies = range(1, len(commands)+1)
+            delete_indicies = list(range(1, len(commands)+1))
         else:
             delete_indicies = []
             for index_str in user_input.split(','):
@@ -83,7 +90,10 @@ class InteractiveCommandExecutor(object):
 
 
 def get_user_input(msg):
-    return raw_input(msg)
+    result = input(msg)
+    print(type(result))
+    assert isinstance(result, str)
+    return result
 
 
 def represents_int(value):

@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/behroozkhorashadi/remember-commands.svg?branch=master)](https://travis-ci.org/behroozkhorashadi/remember-commands)
 [![Coverage Status](https://coveralls.io/repos/github/behroozkhorashadi/remember-commands/badge.svg?branch=master)](https://coveralls.io/github/behroozkhorashadi/remember-commands?branch=master)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 
 ## remember-commands
 

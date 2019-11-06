@@ -2,7 +2,16 @@
 """
 This Module contains the core logic for the remember functions.
 """
-import cPickle as pickle
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+try:
+    import pickle as pickle
+except ImportError:
+    import pickle
+
 import os.path
 import re
 import shutil
@@ -15,12 +24,11 @@ JSON_FILE_NAME = 'command_store.json'
 FILE_STORE_NAME = 'command_storage.txt'
 
 
-def time_cmp(x, y):
-    return ((x.last_used_time() < y.last_used_time())
-            - (x.last_used_time() > y.last_used_time()))
+def time_cmp(item):
+    return item.last_used_time()
 
 
-class bcolors:
+class bcolors(object):
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKGREEN = '\033[92m'
@@ -81,7 +89,7 @@ class CommandStore(object):
                         search_info=False):
         """This method searches the command store for the command given."""
         matches = []
-        for _, command in self._command_dict.iteritems():
+        for _, command in self._command_dict.items():
             if starts_with:
                 if (not command.get_unique_command_id().startswith(search_terms[0])):
                     continue
@@ -90,12 +98,12 @@ class CommandStore(object):
                 matches.append(command)
                 continue
             if (search_info and
-                    command.get_command_info() and
-                    any(search_term in command.get_command_info()
-                        for search_term in search_terms)):
+                command.get_command_info() and
+                any(search_term in command.get_command_info()
+                    for search_term in search_terms)):
                 matches.append(command)
         if sort:
-            matches.sort(time_cmp)
+            matches.sort(key=time_cmp, reverse=True)
         return matches
 
 
@@ -260,7 +268,11 @@ def get_unread_commands(src_file):
     tmp_hist_file = src_file + '.tmp'
     shutil.copyfile(src_file, tmp_hist_file)
     try:
-        for line in reversed(open(tmp_hist_file).readlines()):
+        for line in reversed(open(tmp_hist_file, 'rb').readlines()):
+            try:
+                line = line.decode("utf-8")
+            except UnicodeDecodeError as e:
+                continue
             if PROCESSED_TO_TAG in line:
                 return list(reversed(unproccessed_lines))
             unproccessed_lines.append(line.strip())
@@ -270,11 +282,11 @@ def get_unread_commands(src_file):
 
 
 def read_history_file(
-        store,
-        src_file,
-        store_file,
-        ignore_file=None,
-        mark_read=True):
+    store,
+    src_file,
+    store_file,
+    ignore_file=None,
+    mark_read=True):
     """Read in the history files."""
 
     commands = get_unread_commands(src_file)
@@ -344,7 +356,7 @@ def _jsonify_command_store(command_store, file_name):
         with open(tmp_file, "wb") as out_file:
             out_file.write(jsonpickle.encode(command_store).encode("utf-8"))
     except IOError:
-        print("Unexpected error:", sys.exc_info()[0])
+        print(("Unexpected error:", sys.exc_info()[0]))
         os.remove(tmp_file)
         print("removing {} something went wrong".format(tmp_file))
         return False

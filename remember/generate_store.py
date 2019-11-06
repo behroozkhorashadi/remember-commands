@@ -1,10 +1,16 @@
 #! /usr/bin/env python
 """ This module generates the store pickle file."""
+from __future__ import print_function
+from __future__ import absolute_import
 
 import argparse
 import os.path
 
-import command_store_lib as com_lib
+from future.moves import sys
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
+import remember.command_store_lib as com_lib
 
 IGNORE_RULE_FILE_NAME = 'ignore_rules.txt'
 

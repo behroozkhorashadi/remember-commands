@@ -11,6 +11,7 @@ TEST_PATH_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_FILES_PATH = os.path.join(TEST_PATH_DIR, "test_files")
 
 
+
 class TestCommandStoreLib(unittest.TestCase):
 
     def test_CommandStore_isEmpty(self):

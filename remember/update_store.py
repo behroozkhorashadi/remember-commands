@@ -10,6 +10,18 @@ from future.moves import sys
 
 top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(top_level_dir)
+
+import remember.command_store_lib as command_store
+from remember import handle_args
+from remember.interactive import InteractiveCommandExecutor
+
+import os
+from builtins import str
+
+from future.moves import sys
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
 import remember.command_store_lib as command_store
 from remember import handle_args
 from remember.interactive import InteractiveCommandExecutor

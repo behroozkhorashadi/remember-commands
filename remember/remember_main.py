@@ -23,28 +23,27 @@ def main():
     """Entry point for this executable python module."""
     args = handle_args.setup_args_for_search()
     if not args.save_dir:
-        return """To many or too few args.\n$> remember.py [
+        print("""To many or too few args.\n$> remember.py [
                  file_store_directory_path] [history_file_path]
-                 ['word|phrase to look up']"""
+                 ['word|phrase to look up']""")
+        return
     if not args.history_file_path:
-        return """To many or too few args.\n$> remember.py [
+        print("""To many or too few args.\n$> remember.py [
                  file_store_directory_path] [history_file_path]
-                 ['word|phrase to look up']"""
-    return run_remember_command(args.save_dir, args.json, args.history_file_path, args.query, args.all,
-                                args.startswith, args.execute)
+                 ['word|phrase to look up']""")
+        return
 
-
-def run_remember_command(save_dir, use_json, history_file_path, query, search_all, search_starts_with, execute):
-    store_file_path = command_store.get_file_path(save_dir, use_json)
-    store = command_store.load_command_store(store_file_path, use_json)
-    print('Looking for all past commands with: ' + ", ".join(query))
-    result = store.search_commands(query, search_starts_with, search_info=search_all)
+    store_file_path = command_store.get_file_path(args.save_dir, args.json)
+    store = command_store.load_command_store(store_file_path, args.json)
+    print('Looking for all past commands with: ' + ", ".join(args.query))
+    result = store.search_commands(args.query, args.startswith, search_info=args.all)
     print("Number of results found: " + str(len(result)))
-    if execute:
-        command_executor = InteractiveCommandExecutor(history_file_path)
+    if args.execute:
+        command_executor = InteractiveCommandExecutor(args.history_file_path)
         if not command_executor.run(result):
-            return 'Exit'
-    return command_store.print_commands(result, query)
+            print('Exit')
+        return
+    command_store.print_commands(result, args.query)
 
 
 if __name__ == "__main__":

@@ -5,5 +5,5 @@ pytest
 pytest-cov
 coveralls==1.8.2
 future==0.18.2
-mypy
-mypy-extensions
+mypy ; python_version > '3.0'
+mypy-extensions ; python_version > '3.0'

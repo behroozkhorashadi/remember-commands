@@ -3,13 +3,13 @@
 from __future__ import print_function
 from __future__ import absolute_import
 
-import argparse
 import os.path
 
 from future.moves import sys
 
 top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(top_level_dir)
+from remember.handle_args import setup_args_for_generate
 import remember.command_store_lib as com_lib
 
 IGNORE_RULE_FILE_NAME = 'ignore_rules.txt'
@@ -17,19 +17,7 @@ IGNORE_RULE_FILE_NAME = 'ignore_rules.txt'
 
 def main():
     """Main entry point for this module."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "historyfile",
-        help="The path to the history file. ex: '~/.bash_history'")
-    parser.add_argument(
-        "save_dir", help="The directory path. ex: ~/dir/where/serializedfile/is")
-    parser.add_argument(
-        "-j",
-        "--json",
-        help="Use jsonpickle to serialize/deserialize the store.",
-        action="store_true")
-    args = parser.parse_args()
-
+    args = setup_args_for_generate()
     generate_store_from_args(args.historyfile, args.save_dir, args.json, args.sql)
 
 

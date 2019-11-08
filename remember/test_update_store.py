@@ -24,6 +24,7 @@ class TestMain(TestCase):
                                                                                load_store_mock):
         with mock.patch('argparse.ArgumentParser.parse_args',
                         return_value=argparse.Namespace(json=True,
+                                                        sql=False,
                                                         all=True,
                                                         startswith=True,
                                                         execute=False,
@@ -44,6 +45,7 @@ class TestMain(TestCase):
                                                                          load_store_mock):
         with mock.patch('argparse.ArgumentParser.parse_args',
                         return_value=argparse.Namespace(json=True,
+                                                        sql=False,
                                                         all=True,
                                                         startswith=True,
                                                         execute=False,
@@ -65,6 +67,7 @@ class TestMain(TestCase):
                                                                          load_store_mock):
         with mock.patch('argparse.ArgumentParser.parse_args',
                         return_value=argparse.Namespace(json=True,
+                                                        sql=False,
                                                         all=True,
                                                         startswith=True,
                                                         execute=False,

@@ -18,6 +18,10 @@ class TestCommandStoreLib(unittest.TestCase):
         command_store = command_store_lib.CommandStore()
         self.assertEqual(0, command_store.get_num_commands())
 
+    def test_SqlCommandStore_isEmpty(self):
+        command_store = command_store_lib.SqlCommandStore(':memory:')
+        self.assertEqual(0, command_store.get_num_commands())
+
     def test_search_commands(self):
         file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
         store = command_store_lib.CommandStore()
@@ -28,6 +32,18 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertTrue(len(matches) == 0)
         matches = store.search_commands(["subl"], True)
         self.assertTrue(len(matches) == 1)
+
+    def test_search_commands_with_sqlstore(self):
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
+        store = command_store_lib.SqlCommandStore(':memory:')
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
+        matches = store.search_commands(["add"], search_info=True)
+        self.assertIsNotNone(matches)
+        matches = store.search_commands(["add"], True)
+        self.assertTrue(len(matches) == 0)
+        matches = store.search_commands(["subl"], True)
+        self.assertTrue(len(matches) == 1)
+        store.close()
 
     def test_search_commands_sorted(self):
         command_store = command_store_lib.CommandStore()
@@ -54,6 +70,16 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(1, command_store.get_num_commands())
         self.assertEqual(command, command_store.get_command_by_name(command_str))
         self.assertEqual(None, command_store.get_command_by_name("non existent command string"))
+
+    def test_addCommandToSqlStore(self):
+        command_store = command_store_lib.SqlCommandStore(':memory:')
+        self.assertEqual(0, command_store.get_num_commands())
+        command_str = "some command string"
+        command = command_store_lib.Command(command_str)
+        command_store.add_command(command)
+        self.assertTrue(command_store.has_command(command))
+        self.assertFalse(command_store.has_command(command_store_lib.Command("some other command")))
+        self.assertEqual(1, command_store.get_num_commands())
 
     def test_getPrimaryCommand_CheckcorrectlyIdPrimaryCommand(self):
         command_str = "some command string"
@@ -96,6 +122,7 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual(2, store.get_command_by_name("rm somefile.txt").get_count_seen())
 
     def test_verifyPickle_shouldSaveAndStore_whenCommandIsAdded(self):
+        file_path = ''
         try:
             file_name = os.path.join(TEST_PATH_DIR, "delete_test_pickle.pickle")
             command_store = command_store_lib.CommandStore()
@@ -106,9 +133,11 @@ class TestCommandStoreLib(unittest.TestCase):
             command_store = command_store_lib.load_command_store(file_name)
             self.assertTrue(command_store.has_command(command))
         finally:
-            os.remove(file_name)
+            if file_path:
+                os.remove(file_path)
 
     def test_jsonSave_shouldLoadCommandStoreFromJson_whenCommandIsAddedAndStoreSaved(self):
+        file_name = ''
         try:
             file_name = os.path.join(TEST_PATH_DIR, "delete_test_json.json")
             command_store = command_store_lib.CommandStore()
@@ -116,13 +145,16 @@ class TestCommandStoreLib(unittest.TestCase):
             command = command_store_lib.Command(command_str)
             command_store.add_command(command)
             command_store_lib.save_command_store(command_store, file_name, True)
-            command_store = command_store_lib.load_command_store(file_name, True)
+            command_store = command_store_lib.load_command_store(file_name,
+                                                                 command_store_lib.JSON_STORE)
             self.assertTrue(command_store.has_command(command))
         finally:
-            os.remove(file_name)
+            if file_name:
+                os.remove(file_name)
 
     def test_verifyPickle_withJson(self):
         use_json = True
+        file_path = ''
         try:
             file_path = os.path.join(TEST_PATH_DIR, "delete_test_pickle.pickle")
             command_store = command_store_lib.CommandStore()
@@ -130,10 +162,27 @@ class TestCommandStoreLib(unittest.TestCase):
             command = command_store_lib.Command(command_str)
             command_store.add_command(command)
             command_store_lib.save_command_store(command_store, file_path, use_json)
-            command_store = command_store_lib.load_command_store(file_path, use_json)
+            command_store = command_store_lib.load_command_store(file_path,
+                                                                 command_store_lib.JSON_STORE)
             self.assertTrue(command_store.has_command(command))
         finally:
-            os.remove(file_path)
+            if file_path:
+                os.remove(file_path)
+
+    def test_sqlCommandStore_whenAddingItem_shouldReturnTrueWhenSearching(self):
+        try:
+            file_path = os.path.join(TEST_PATH_DIR, "delete_test_sql_store.db")
+            command_store = command_store_lib.SqlCommandStore(file_path)
+            command_str = "git branch"
+            command = command_store_lib.Command(command_str)
+            command_store.add_command(command)
+            command_store = command_store_lib.load_command_store(file_path,
+                                                                 command_store_lib.SQL_STORE)
+            self.assertTrue(command_store.has_command(command))
+        finally:
+            if file_path:
+                os.remove(file_path)
+
 
     def test_verify_read_pickle_file(self):
         file_name = os.path.join(TEST_FILES_PATH, "test_pickle.pickle")
@@ -147,7 +196,19 @@ class TestCommandStoreLib(unittest.TestCase):
 
     def test_verify_read_json_file(self):
         file_name = os.path.join(TEST_FILES_PATH, "test_json.json")
-        store = command_store_lib.load_command_store(file_name, format_is_json=True)
+        store = command_store_lib.load_command_store(file_name,
+                                                     store_type=command_store_lib.JSON_STORE)
+        matches = store.search_commands([""], False)
+        self.assertTrue(len(matches) > 0)
+        matches = store.search_commands(["rm"], True)
+        self.assertTrue(len(matches) == 1)
+        self.assertEqual(matches[0].get_unique_command_id(), 'rm somefile.txt')
+        self.assertEqual(matches[0].get_count_seen(), 2)
+
+    def test_verify_read_sql_file(self):
+        file_name = os.path.join(TEST_FILES_PATH, "remember.db")
+        store = command_store_lib.load_command_store(file_name,
+                                                     store_type=command_store_lib.SQL_STORE)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
         matches = store.search_commands(["rm"], True)
@@ -166,7 +227,8 @@ class TestCommandStoreLib(unittest.TestCase):
     def test_verify_read_json_file_time(self):
         file_name = os.path.join(TEST_FILES_PATH, "test_json.json")
         self.assertTrue(os.path.isfile(file_name))
-        store = command_store_lib.load_command_store(file_name, format_is_json=True)
+        store = command_store_lib.load_command_store(file_name,
+                                                     store_type=command_store_lib.JSON_STORE)
         matches = store.search_commands([""], False)
         self.assertTrue(len(matches) > 0)
         for m in matches:
@@ -174,7 +236,7 @@ class TestCommandStoreLib(unittest.TestCase):
 
     def test_readUnproccessedLinesOnly(self):
         file_name = os.path.join(TEST_FILES_PATH, "test_processed.txt")
-        unread_commands = command_store_lib.get_unread_commands(file_name)
+        unread_commands = command_store_lib._get_unread_commands(file_name)
         self.assertEqual("vim somefile.txt", unread_commands[0])
         self.assertEqual("git commit -a -m \"renamed directory.\"", unread_commands[1])
         self.assertEqual(2, len(unread_commands))
@@ -207,8 +269,21 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertIsNotNone(store.delete_command('vim somefile.txt'))
         self.assertFalse(store.has_command_by_name("vim somefile.txt"))
 
+    def test_delete_sql_whenExists_shouldDeleteFromStore(self):
+        file_name = os.path.join(TEST_FILES_PATH, "test_input.txt")
+        self.assertTrue(os.path.isfile(file_name))
+        store = command_store_lib.SqlCommandStore(':memory:')
+        command_store_lib.read_history_file(store, file_name, "doesntmatter", None, False)
+        self.assertTrue(store.has_command_by_name("vim somefile.txt"))
+        self.assertIsNotNone(store.delete_command('vim somefile.txt'))
+        self.assertFalse(store.has_command_by_name("vim somefile.txt"))
+
     def test_delete_whenDoesntExists_shouldDeleteFromStore(self):
         store = command_store_lib.CommandStore()
+        self.assertIsNone(store.delete_command('anything'))
+
+    def test_deleteSql_whenDoesntExists_shouldDeleteFromStore(self):
+        store = command_store_lib.SqlCommandStore(':memory:')
         self.assertIsNone(store.delete_command('anything'))
 
     def test_ignoreRule_whenCreate_shouldCreateWorkingIgnoreRule(self):
@@ -252,10 +327,19 @@ class TestCommandStoreLib(unittest.TestCase):
         self.assertEqual('my_dir/path/' + command_store_lib.PICKLE_FILE_NAME, result)
         result = command_store_lib.get_file_path('my_dir/path', True)
         self.assertEqual('my_dir/path/' + command_store_lib.JSON_FILE_NAME, result)
+        result = command_store_lib.get_file_path('my_dir/path', False, True)
+        self.assertEqual('my_dir/path/' + command_store_lib.REMEMBER_DB_FILE_NAME, result)
 
     def test_load_file_when_file_not_there(self):
         command_store = command_store_lib.load_command_store('randomNonExistantFile.someextension')
         self.assertEqual(command_store.get_num_commands(), 0)
+
+    def test_get_file_type_whenFileTypeisSql_shouldReturnSqlStore(self):
+        self.assertEqual(command_store_lib.get_store_type(False, True), command_store_lib.SQL_STORE)
+
+    def test_get_file_type_whenFileTypeIsNeither_shouldReturnPickleStore(self):
+        self.assertEqual(command_store_lib.get_store_type(False, False),
+                         command_store_lib.PICKLE_STORE)
 
 
 if __name__ == '__main__':

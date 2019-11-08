@@ -3,16 +3,32 @@
 This Module contains the core logic for the remember functions.
 """
 from __future__ import print_function
+
+import sqlite3
+
 from future import standard_library
+from future.moves import sys
+import os.path
+
+from remember.sql_query_constants import SQL_CREATE_REMEMBER_TABLE, SEARCH_COMMANDS_QUERY, \
+    SIMPLE_SELECT_COMMAND_QUERY, DELETE_FROM_REMEMBER, GET_ROWID_FOR_COMMAND, \
+    INSERT_INTO_REMEMBER_QUERY, UPDATE_COUNT_QUERY, TABLE_EXISTS_QUERY, TABLE_NAME
+
+top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(top_level_dir)
+
+
 standard_library.install_aliases()
 from builtins import str
 from builtins import object
+
+
 try:
     import pickle as pickle
 except ImportError:
     import pickle
 
-import os.path
+
 import re
 import shutil
 import sys
@@ -22,6 +38,11 @@ PROCESSED_TO_TAG = '****** previous commands read *******'
 PICKLE_FILE_NAME = 'pickle_file.pickle'
 JSON_FILE_NAME = 'command_store.json'
 FILE_STORE_NAME = 'command_storage.txt'
+REMEMBER_DB_FILE_NAME = 'remember.db'
+# Table type enums
+JSON_STORE = 1
+PICKLE_STORE = 2
+SQL_STORE = 3
 
 
 def time_cmp(item):
@@ -50,6 +71,9 @@ class CommandStore(object):
     def __init__(self):
         self._command_dict = {}
 
+    def get_all_commands(self):
+        return self._command_dict.values()
+
     def add_command(self, command):
         """This method adds a command to the store."""
         if command.get_unique_command_id() not in self._command_dict:
@@ -65,7 +89,7 @@ class CommandStore(object):
 
     def has_command(self, command):
         """This method checks to see if a command is in the store. """
-        return command.get_unique_command_id() in self._command_dict
+        return self.has_command_by_name(command.get_unique_command_id())
 
     def has_command_by_name(self, command_str):
         """This method checks to see if a command (by name) is in the store.
@@ -107,8 +131,10 @@ class CommandStore(object):
         return matches
 
 
-def print_commands(commands, highlighted_terms=[]):
+def print_commands(commands, highlighted_terms=None):
     """Pretty print the commands."""
+    if highlighted_terms is None:
+        highlighted_terms = []
     x = 1
     for command in commands:
         print_command(x, command, highlighted_terms)
@@ -116,8 +142,10 @@ def print_commands(commands, highlighted_terms=[]):
     return ""
 
 
-def print_command(index, command, highlighted_terms=[]):
+def print_command(index, command, highlighted_terms=None):
     """Pretty print a single command."""
+    if highlighted_terms is None:
+        highlighted_terms = []
     command_str = command.get_unique_command_id()
     info_str = command.get_command_info()
     for term in highlighted_terms:
@@ -185,13 +213,13 @@ class IgnoreRules(object):
 class Command(object):
     """This class holds the basic pieces for a command."""
 
-    def __init__(self, command_str="", last_used=time.time()):
+    def __init__(self, command_str="", last_used=time.time(), count_seen=1):
         self._command_str = Command.get_currated_command(command_str)
         self._context_before = set()
         self._context_after = set()
         self._manual_comments = "Place any comments here."
         self._parse_command(self._command_str)
-        self._count_seen = 1
+        self._count_seen = count_seen
         self._last_used = last_used
         self._command_info = ""
 
@@ -250,9 +278,9 @@ class Command(object):
     def set_command_info(self, info):
         self._command_info = info
 
-    @staticmethod
-    def get_currated_command(command_str):
-        """Given a command string currate the string and return."""
+    @classmethod
+    def get_currated_command(cls, command_str):
+        """Given a command string curate the string and return."""
         currated_command = re.sub(' +', ' ', command_str.strip())
         if currated_command.startswith(":"):
             p = re.compile(";")
@@ -262,7 +290,7 @@ class Command(object):
         return currated_command
 
 
-def get_unread_commands(src_file):
+def _get_unread_commands(src_file):
     """Read the history file and get all the unread commands."""
     unproccessed_lines = []
     tmp_hist_file = src_file + '.tmp'
@@ -289,7 +317,7 @@ def read_history_file(
     mark_read=True):
     """Read in the history files."""
 
-    commands = get_unread_commands(src_file)
+    commands = _get_unread_commands(src_file)
     output = []
     if ignore_file:
         ignore_rules = IgnoreRules.create_ignore_rule(ignore_file)
@@ -312,11 +340,13 @@ def read_history_file(
             myfile.write(PROCESSED_TO_TAG + "\n")
 
 
-def get_file_path(directory_path, use_json=False):
+def get_file_path(directory_path, use_json=False, use_sql=False):
     """Get the pickle file given the directory where the files is."""
-    if not use_json:
-        return os.path.join(directory_path, PICKLE_FILE_NAME)
-    return os.path.join(directory_path, JSON_FILE_NAME)
+    if use_json:
+        return os.path.join(directory_path, JSON_FILE_NAME)
+    if use_sql:
+        return get_default_sql_db_file_location(directory_path)
+    return os.path.join(directory_path, PICKLE_FILE_NAME)
 
 
 def _load_command_store_from_pickle(file_name):
@@ -324,13 +354,18 @@ def _load_command_store_from_pickle(file_name):
     return pickle.load(open(file_name, "rb"))
 
 
+def _load_command_store_from_sql(db_file_name):
+    return SqlCommandStore(db_file_name)
+
+
 def _load_command_store_from_json(file_name):
-    """Load the command store from a pickle file."""
+    """Load the command store from a json pickle file."""
     try:
         import jsonpickle
     except ImportError:
-        print(bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
-              + bcolors.ENDC)
+        print(
+            bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
+            + bcolors.ENDC)
         return CommandStore()
     with open(file_name, "rb") as in_file:
         command_store = jsonpickle.decode(in_file.read())
@@ -348,8 +383,9 @@ def _jsonify_command_store(command_store, file_name):
     try:
         import jsonpickle
     except ImportError:
-        print(bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
-              + bcolors.ENDC)
+        print(
+            bcolors.FAIL + 'Trying to use jsonpickle but importing the module failed. Is it installed?'
+            + bcolors.ENDC)
 
     tmp_file = file_name + '.tmp'
     try:
@@ -366,15 +402,23 @@ def _jsonify_command_store(command_store, file_name):
     return True
 
 
-def load_command_store(file_name, format_is_json=False):
+def load_command_store(file_name, store_type=PICKLE_STORE):
     """Get the command store from the input file."""
-    if format_is_json:
+    if store_type == JSON_STORE:
         load_store_method = _load_command_store_from_json
-    else:
+    elif store_type == PICKLE_STORE:
         load_store_method = _load_command_store_from_pickle
+    elif store_type == SQL_STORE:
+        return _load_command_store_from_sql(file_name)
+    else:
+        raise Exception('Store type: {} unknown.'.format(store_type))
     if os.path.isfile(file_name):
-        print(bcolors.OKBLUE + 'Unpacking json file ' + file_name + bcolors.ENDC)
+        print(bcolors.OKBLUE + 'Unpacking file ' + file_name + bcolors.ENDC)
+        a = time.time()
         store = load_store_method(file_name)
+        b = time.time()
+        time_sec = b - a
+        print("It took {} seconds to load the store".format(time_sec))
     else:
         store = CommandStore()
         print(bcolors.FAIL + 'File not found: ' + file_name + bcolors.ENDC)
@@ -387,3 +431,161 @@ def save_command_store(store, filename, write_to_json=False):
     else:
         save_store_method = _pickle_command_store
     return save_store_method(store, filename)
+
+
+def init_tables_if_not_exists(db_conn):
+    if not check_table_exists(db_conn, TABLE_NAME):
+        create_db_tables(db_conn)
+
+
+def create_db_connection(db_file_path):
+    db_conn = None
+    try:
+        db_conn = sqlite3.connect(db_file_path)
+        return db_conn
+    except sqlite3.Error as e:
+        print(e)
+    return db_conn
+
+
+def check_table_exists(db_conn, table_name):
+    c = db_conn.cursor()
+    c.execute(TABLE_EXISTS_QUERY.format(table_name))
+    db_conn.commit()
+    if c.fetchone()[0] == 1:
+        return True
+    return False
+
+
+class SqlCommandStore(object):
+    def __init__(self, db_file):
+        self._db_file = db_file
+        self._tables_created = None
+        self._db_conn = None
+
+    def _get_db_conn(self):
+        if not self._db_conn:
+            self._db_conn = create_db_connection(self._db_file)
+            assert self._db_conn
+            if not self._tables_created:
+                init_tables_if_not_exists(self._db_conn)
+                self._tables_created = True
+        return self._db_conn
+
+    def add_command(self, command):
+        row_id = self._get_rowid_of_command(command.get_unique_command_id())
+        db_conn = self._get_db_conn()
+        with db_conn:
+            cursor = db_conn.cursor()
+            if row_id:
+                cursor.execute(UPDATE_COUNT_QUERY, (command.last_used_time(), row_id,))
+            else:
+                row_insert = (command.get_unique_command_id(), command.get_count_seen(),
+                              command.last_used_time(), command.get_command_info())
+                cursor.execute(INSERT_INTO_REMEMBER_QUERY, row_insert)
+
+    def _get_rowid_of_command(self, command_str):
+        db_conn = self._get_db_conn()
+        cursor = db_conn.cursor()
+        cursor.execute(GET_ROWID_FOR_COMMAND, (command_str,))
+        data = cursor.fetchone()
+        if data is None:
+            return None
+        else:
+            return data[0]
+
+    def delete_command(self, command_str):
+        db_conn = self._get_db_conn()
+        with db_conn:
+            cur = db_conn.cursor()
+            cur.execute(DELETE_FROM_REMEMBER, (command_str,))
+            db_conn.commit()
+            if cur.rowcount == 0:
+                return None
+            return command_str
+
+    def has_command(self, command):
+        """This method checks to see if a command is in the store. """
+        return self.has_command_by_name(command.get_unique_command_id())
+
+    def has_command_by_name(self, command_str):
+        """This method checks to see if a command (by name) is in the store.
+        """
+        db_conn = self._get_db_conn()
+        cursor = db_conn.cursor()
+        cursor.execute(SIMPLE_SELECT_COMMAND_QUERY, (command_str,))
+        data = cursor.fetchall()
+        if len(data) == 0:
+            return False
+        return True
+
+    def get_num_commands(self):
+        """This method returns the number of commands in the store."""
+        db_conn = self._get_db_conn()
+        cursor = db_conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM {}'.format('remember'))
+        count = cursor.fetchall()
+        print('\nTotal rows: {}'.format(count[0][0]))
+        return count[0][0]
+
+    def search_commands(self,
+                        search_terms,
+                        starts_with=False,
+                        sort=True,
+                        search_info=False):
+        """This method searches the command store for the command given."""
+        search_query = _create_command_search_select_query(search_terms, starts_with, sort,
+                                                           search_info)
+        matches = []
+        db_conn = self._get_db_conn()
+        with db_conn:
+            cursor = db_conn.cursor()
+            cursor.execute(search_query)
+            rows = cursor.fetchall()
+            for row in rows:
+                command = Command(row[0], row[2], row[1])
+                command.set_command_info(row[3])
+                matches.append(command)
+        return matches
+
+    def close(self):
+        if self._db_conn:
+            self._db_conn.close()
+
+
+def _create_command_search_select_query(search_term, starts_with, sort,
+                                        search_info):
+    where_terms = []
+    prepend_term = '' if starts_with else '%'
+    for term in search_term:
+        like_term = prepend_term + term + '%'
+        where_terms.append("full_command LIKE '{}'".format(like_term))
+        if search_info:
+            where_terms.append("command_info LIKE '{}'".format(like_term))
+    where_clause = 'WHERE ' + ' OR '.join(where_terms)
+    query = SEARCH_COMMANDS_QUERY.format(where_clause)
+    if sort:
+        query = query + ' ORDER BY last_used DESC'
+    return query
+
+
+def get_default_sql_db_file_location(base_directory):
+    return os.path.join(base_directory, REMEMBER_DB_FILE_NAME)
+
+
+def create_db_tables(db_conn):
+    """ create a database connection to a SQLite database """
+    print('Creating table')
+    try:
+        c = db_conn.cursor()
+        c.execute(SQL_CREATE_REMEMBER_TABLE)
+    except sqlite3.Error as e:
+        print(e)
+
+
+def get_store_type(use_json, use_sql):
+    if use_json:
+        return JSON_STORE
+    if use_sql:
+        return SQL_STORE
+    return PICKLE_STORE

@@ -11,10 +11,6 @@ from future.moves import sys
 top_level_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(top_level_dir)
 
-import remember.command_store_lib as command_store
-from remember import handle_args
-from remember.interactive import InteractiveCommandExecutor
-
 import os
 from builtins import str
 
@@ -30,8 +26,9 @@ from remember.interactive import InteractiveCommandExecutor
 def main(command_executor):
     """Entry point for this executable python module."""
     args = handle_args.setup_args_for_update()
-    store_file_path = command_store.get_file_path(args.save_dir, args.json)
-    store = command_store.load_command_store(store_file_path, args.json)
+    store_file_path = command_store.get_file_path(args.save_dir, args.json, args.sql)
+    store_type = command_store.get_store_type(args.json, args.sql)
+    store = command_store.load_command_store(store_file_path, store_type)
     print('Looking for all past commands with: ' + ", ".join(args.query))
     result = store.search_commands(args.query, args.startswith, )
     print("Number of results found: " + str(len(result)))

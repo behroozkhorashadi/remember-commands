@@ -30,18 +30,19 @@ def main():
         action="store_true")
     args = parser.parse_args()
 
-    generate_store_from_args(args.historyfile, args.save_dir, args.json)
+    generate_store_from_args(args.historyfile, args.save_dir, args.json, args.sql)
 
 
-def generate_store_from_args(history_file_path, save_directory, use_json):
-    store_file_path = com_lib.get_file_path(save_directory, use_json)
+def generate_store_from_args(history_file_path, save_directory, use_json, use_sql):
+    store_file_path = com_lib.get_file_path(save_directory, use_json, use_sql)
     commands_file_path = os.path.join(save_directory, com_lib.FILE_STORE_NAME)
     ignore_rule_file = os.path.join(save_directory, IGNORE_RULE_FILE_NAME)
     if not os.path.isfile(ignore_rule_file):
         ignore_rule_file = None
     else:
         print('Using ignore rules from ' + ignore_rule_file)
-    store = com_lib.load_command_store(store_file_path, use_json)
+    store_type = com_lib.get_store_type(use_json, use_sql)
+    store = com_lib.load_command_store(store_file_path, store_type)
     com_lib.read_history_file(
         store,
         history_file_path,

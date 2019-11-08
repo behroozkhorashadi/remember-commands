@@ -10,6 +10,7 @@ class TestMain(TestCase):
     def test_setup_args_for_search_but_missing_save_dir_should_return_error_string(self):
         with mock.patch('argparse.ArgumentParser.parse_args',
                         return_value=argparse.Namespace(json=True,
+                                                        sql=False,
                                                         all=True,
                                                         startswith=True,
                                                         execute=False,
@@ -19,6 +20,7 @@ class TestMain(TestCase):
             assert remember_main.main().startswith("To many or too few args")
 
     @mock.patch('argparse.ArgumentParser.parse_args', return_value=argparse.Namespace(json=True,
+                                                                                      sql=False,
                                                                                       all=True,
                                                                                       startswith=True,
                                                                                       execute=False,
@@ -35,6 +37,7 @@ class TestMain(TestCase):
                                                                                         store_mock):
         with mock.patch('argparse.ArgumentParser.parse_args',
                         return_value=argparse.Namespace(json=True,
+                                                        sql=False,
                                                         all=True,
                                                         startswith=True,
                                                         execute=False,

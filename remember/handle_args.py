@@ -5,6 +5,7 @@ def setup_args_for_update():
     parser = argparse.ArgumentParser()
     add_search(parser)
     add_json(parser)
+    add_sql(parser)
     parser.add_argument(
         "-u",
         "--updateinfo",
@@ -19,9 +20,17 @@ def setup_args_for_update():
     return parser.parse_args()
 
 
+def setup_for_migrate():
+    parser = argparse.ArgumentParser()
+    add_json(parser)
+    add_save_dir(parser)
+    return parser.parse_args()
+
+
 def setup_args_for_search():
     parser = argparse.ArgumentParser()
     add_json(parser)
+    add_sql(parser)
     add_search(parser)
     parser.add_argument(
         "-e",
@@ -35,6 +44,7 @@ def setup_args_for_search():
 def setup_args_for_generate():
     parser = argparse.ArgumentParser()
     add_json(parser)
+    add_sql(parser)
     parser.add_argument(
         "historyfile",
         help="The path to the history file. ex: '~/.bash_history'")
@@ -51,6 +61,14 @@ def add_json(parser):
         action="store_true")
 
 
+def add_sql(parser):
+    parser.add_argument(
+        "-q",
+        "--sql",
+        help="Use sql to back the store.",
+        action="store_true")
+
+
 def add_search(parser):
     parser.add_argument(
         "-a",
@@ -64,10 +82,14 @@ def add_search(parser):
         action="store_true")
 
 
-def add_required_terms(parser, add_history_arg=False):
+def add_save_dir(parser):
     parser.add_argument(
         "save_dir",
         help="The directory path. ex: ~/dir/where/serializedfile/is")
+
+
+def add_required_terms(parser, add_history_arg=False):
+    add_save_dir(parser)
     if add_history_arg:
         parser.add_argument(
             "history_file_path",

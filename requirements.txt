@@ -4,6 +4,6 @@ coverage==4.5.4
 pytest
 pytest-cov
 coveralls==1.8.2
-future==0.18.2
+future==1.0.0
 mypy ; python_version > '3.0'
 mypy-extensions ; python_version > '3.0'
